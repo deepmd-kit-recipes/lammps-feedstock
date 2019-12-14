@@ -13,7 +13,7 @@ source:
     - deepmd.patch
     
 build:
-  number: 1
+  number: 2
   string: "{{ PKG_BUILDNUM }}_{{ dp_variant }}"  # [float_prec == 'high']
   string: "{{ PKG_BUILDNUM }}_{{ dp_variant }}_{{float_prec}}"  # [float_prec != 'high']
   skip: True  # [not linux]
