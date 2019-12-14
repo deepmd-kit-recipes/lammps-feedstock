@@ -4,3 +4,7 @@ dp_variant:
 float_prec:
 - low
 - high
+channel_sources:
+- deepmodeling,defaults
+channel_targets:
+- deepmodeling main
