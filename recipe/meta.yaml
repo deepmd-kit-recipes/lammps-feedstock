@@ -1,6 +1,11 @@
 {% set name = "lammps-dp" %}
 {% set version = "1.1.3" %}
 {% set lammps = "stable_7Aug2019" %}
+{% if cuda_compiler_version == "None" %}
+{% set dp_variant = "cpu" %}
+{% else %}
+{% set dp_variant = "gpu" %}
+{% endif %}
 
 package:
   name: {{ name|lower }}
@@ -13,9 +18,9 @@ source:
     - deepmd.patch
     
 build:
-  number: 0
-  string: "{{ PKG_BUILDNUM }}_{{ dp_variant }}"  # [float_prec == 'high']
-  string: "{{ PKG_BUILDNUM }}_{{ dp_variant }}_{{float_prec}}"  # [float_prec != 'high']
+  number: 1
+  string: "{{ PKG_BUILDNUM }}_cuda{{ cuda_compiler_version }}_{{ dp_variant }}"  # [float_prec == 'high']
+  string: "{{ PKG_BUILDNUM }}_cuda{{ cuda_compiler_version }}_{{ dp_variant }}_{{float_prec}}"  # [float_prec != 'high']
   skip: True  # [not linux]
 
 requirements:
@@ -28,6 +33,7 @@ requirements:
   host:
     - libdeepmd {{ version }} *{{ dp_variant }}  # [float_prec == 'high']
     - libdeepmd {{ version }} *{{ dp_variant }}_{{ float_prec }}  # [float_prec != 'high'] 
+    - cudatoolkit {{ cuda_compiler_version }}* # [cuda_compiler_version != 'None']
     - mpich
     - zlib
     - fftw
@@ -35,9 +41,9 @@ requirements:
     - jpeg
 
   run:
-    - libdeepmd {{ version }} *{{ dp_variant }}  # [float_prec == 'high']
-    - libdeepmd {{ version }} *{{ dp_variant }}_{{ float_prec }}  # [float_prec != 'high'] 
+    - {{ pin_compatible('libdeepmd', exact=True) }}
     - {{ pin_compatible('mpich') }}
+    - {{ pin_compatible('cudatoolkit', max_pin='x.x') }} # [cuda_compiler_version != 'None']
     - fftw
     - libpng
     - jpeg
