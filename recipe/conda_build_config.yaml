@@ -1,6 +1,8 @@
-dp_variant:
-- gpu
-- cpu
+cuda_compiler_version:
+- None
+- 9.2
+- 10.0
+- 10.1
 float_prec:
 - low
 - high
