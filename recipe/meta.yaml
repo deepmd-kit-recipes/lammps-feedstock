@@ -41,7 +41,7 @@ requirements:
     - jpeg
 
   run:
-    - {{ pin_subpackage('libdeepmd', exact=True) }}
+    - {{ pin_compatible('libdeepmd', exact=True) }}
     - {{ pin_compatible('mpich') }}
     - {{ pin_compatible('cudatoolkit', max_pin='x.x') }} # [cuda_compiler_version != 'None']
     - fftw
