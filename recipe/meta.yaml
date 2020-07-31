@@ -35,6 +35,7 @@ requirements:
     - libdeepmd {{ version }} *{{ dp_variant }}_{{ float_prec }}  # [float_prec != 'high'] 
     - cudatoolkit {{ cuda_compiler_version }}* # [cuda_compiler_version != 'None']
     - libopenblas
+    - gsl
     - mpich
     - zlib
     - fftw
