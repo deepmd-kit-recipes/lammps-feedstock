@@ -31,6 +31,9 @@ requirements:
     - cmake
     - make
     - vim
+    - mpich-mpicc
+    - mpich-mpicxx
+    - mpich-mpifort
   
   host:
     - libdeepmd {{ version }} *{{ dp_variant }}  # [float_prec == 'high']
