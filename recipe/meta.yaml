@@ -29,7 +29,8 @@ requirements:
     - {{ compiler('cxx') }}
     - {{ compiler('fortran') }}
     - cmake
-    - make 
+    - make
+    - vim
   
   host:
     - libdeepmd {{ version }} *{{ dp_variant }}  # [float_prec == 'high']
