@@ -27,17 +27,17 @@ requirements:
   build:
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
-    - {{ compiler('fortran') }}
+    #- {{ compiler('fortran') }}
     - cmake
     - make
-    - vim
+    #- vim
   
   host:
     - libdeepmd {{ version }} *{{ dp_variant }}  # [float_prec == 'high']
     - libdeepmd {{ version }} *{{ dp_variant }}_{{ float_prec }}  # [float_prec != 'high'] 
     - cudatoolkit {{ cuda_compiler_version }}* # [cuda_compiler_version != 'None']
-    - libopenblas
-    - gsl
+    #- libopenblas
+    #- gsl
     - mpich
     - zlib
     - fftw
