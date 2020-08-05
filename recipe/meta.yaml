@@ -18,7 +18,7 @@ source:
     - deepmd.patch
     
 build:
-  number: 1
+  number: 2
   string: "{{ PKG_BUILDNUM }}_cuda{{ cuda_compiler_version }}_{{ dp_variant }}"  # [float_prec == 'high']
   string: "{{ PKG_BUILDNUM }}_cuda{{ cuda_compiler_version }}_{{ dp_variant }}_{{float_prec}}"  # [float_prec != 'high']
   skip: True  # [not linux]
@@ -38,6 +38,7 @@ requirements:
     - cudatoolkit {{ cuda_compiler_version }}* # [cuda_compiler_version != 'None']
     #- libopenblas
     #- gsl
+    - plumed
     - mpich
     - zlib
     - fftw
@@ -48,6 +49,7 @@ requirements:
     - {{ pin_compatible('libdeepmd', exact=True) }}
     - {{ pin_compatible('mpich') }}
     - {{ pin_compatible('cudatoolkit', max_pin='x.x') }} # [cuda_compiler_version != 'None']
+    - plumed >=2
     - fftw
     - libpng
     - jpeg
