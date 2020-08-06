@@ -44,7 +44,9 @@ requirements:
 outputs:
   - name: liblammps-dp
     files:
-      - lib/liblammps.so
+      - lib/liblammps.so*
+      - lib/pkgconfig/liblammps.pc
+      - share/cmake/Modules/FindLAMMPS.cmake
       - share/lammps
       - share/man/man1/lmp*
     requirements:
