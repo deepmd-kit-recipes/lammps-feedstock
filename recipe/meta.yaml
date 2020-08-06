@@ -21,6 +21,7 @@ build:
   number: 3
   string: "{{ PKG_BUILDNUM }}_cuda{{ cuda_compiler_version }}_{{ dp_variant }}"  # [float_prec == 'high']
   string: "{{ PKG_BUILDNUM }}_cuda{{ cuda_compiler_version }}_{{ dp_variant }}_{{float_prec}}"  # [float_prec != 'high']
+  noarch: python
   skip: True  # [not linux]
 
 requirements:
@@ -31,6 +32,7 @@ requirements:
     - make
   
   host:
+    - python
     - libdeepmd {{ version }} *{{ dp_variant }}  # [float_prec == 'high']
     - libdeepmd {{ version }} *{{ dp_variant }}_{{ float_prec }}  # [float_prec != 'high'] 
     - cudatoolkit {{ cuda_compiler_version }}* # [cuda_compiler_version != 'None']
@@ -93,6 +95,21 @@ outputs:
         - lmp -help
         #- mv frozen_model_low.pb frozen_model.pb  # [float_prec == 'low']
         #- lmp -in input.lammps
+
+  - name: pylammps-dp
+    build:
+      noarch: python
+    files:
+      - lib/python*/site-packages/lammps.py
+    requirements:
+      host:
+        - python
+      run:
+        - python
+        - {{ pin_subpackage('liblammps-dp', exact=True) }}
+    test:
+      imports:
+        - lammps
 
 about:
   home: http://lammps.sandia.gov
