@@ -106,7 +106,7 @@ outputs:
         - python
       run:
         - python
-        - {{ pin_subpackage('liblammps-dp', exact=True) }}
+        - {{ pin_subpackage('liblammps-dp', max_pin='x.x') }}
     test:
       imports:
         - lammps
