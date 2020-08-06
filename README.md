@@ -5,7 +5,7 @@ Home: http://lammps.sandia.gov
 
 Package license: GPL-2.0
 
-Feedstock license: BSD 3-Clause
+Feedstock license: BSD-3-Clause
 
 Summary: LAMMPS stands for Large-scale Atomic/Molecular Massively Parallel Simulator.
 
@@ -34,83 +34,65 @@ Current build status
         <table>
           <thead><tr><th>Variant</th><th>Status</th></tr></thead>
           <tbody><tr>
-              <td>linux_cuda_compiler_version10.0float_prechigh</td>
+              <td>linux_64_cuda_compiler_version10.0float_prechigh</td>
               <td>
                 <a href="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_build/latest?definitionId=3&branchName=master">
-                  <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=master&jobName=linux&configuration=linux_cuda_compiler_version10.0float_prechigh" alt="variant">
+                  <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=master&jobName=linux&configuration=linux_64_cuda_compiler_version10.0float_prechigh" alt="variant">
                 </a>
               </td>
             </tr><tr>
-              <td>linux_cuda_compiler_version10.0float_preclow</td>
+              <td>linux_64_cuda_compiler_version10.0float_preclow</td>
               <td>
                 <a href="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_build/latest?definitionId=3&branchName=master">
-                  <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=master&jobName=linux&configuration=linux_cuda_compiler_version10.0float_preclow" alt="variant">
+                  <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=master&jobName=linux&configuration=linux_64_cuda_compiler_version10.0float_preclow" alt="variant">
                 </a>
               </td>
             </tr><tr>
-              <td>linux_cuda_compiler_version10.1float_prechigh</td>
+              <td>linux_64_cuda_compiler_version10.1float_prechigh</td>
               <td>
                 <a href="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_build/latest?definitionId=3&branchName=master">
-                  <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=master&jobName=linux&configuration=linux_cuda_compiler_version10.1float_prechigh" alt="variant">
+                  <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=master&jobName=linux&configuration=linux_64_cuda_compiler_version10.1float_prechigh" alt="variant">
                 </a>
               </td>
             </tr><tr>
-              <td>linux_cuda_compiler_version10.1float_preclow</td>
+              <td>linux_64_cuda_compiler_version10.1float_preclow</td>
               <td>
                 <a href="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_build/latest?definitionId=3&branchName=master">
-                  <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=master&jobName=linux&configuration=linux_cuda_compiler_version10.1float_preclow" alt="variant">
+                  <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=master&jobName=linux&configuration=linux_64_cuda_compiler_version10.1float_preclow" alt="variant">
                 </a>
               </td>
             </tr><tr>
-              <td>linux_cuda_compiler_version9.2float_prechigh</td>
+              <td>linux_64_cuda_compiler_version9.2float_prechigh</td>
               <td>
                 <a href="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_build/latest?definitionId=3&branchName=master">
-                  <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=master&jobName=linux&configuration=linux_cuda_compiler_version9.2float_prechigh" alt="variant">
+                  <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=master&jobName=linux&configuration=linux_64_cuda_compiler_version9.2float_prechigh" alt="variant">
                 </a>
               </td>
             </tr><tr>
-              <td>linux_cuda_compiler_version9.2float_preclow</td>
+              <td>linux_64_cuda_compiler_version9.2float_preclow</td>
               <td>
                 <a href="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_build/latest?definitionId=3&branchName=master">
-                  <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=master&jobName=linux&configuration=linux_cuda_compiler_version9.2float_preclow" alt="variant">
+                  <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=master&jobName=linux&configuration=linux_64_cuda_compiler_version9.2float_preclow" alt="variant">
                 </a>
               </td>
             </tr><tr>
-              <td>linux_cuda_compiler_versionNonefloat_prechigh</td>
+              <td>linux_64_cuda_compiler_versionNonefloat_prechigh</td>
               <td>
                 <a href="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_build/latest?definitionId=3&branchName=master">
-                  <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=master&jobName=linux&configuration=linux_cuda_compiler_versionNonefloat_prechigh" alt="variant">
+                  <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=master&jobName=linux&configuration=linux_64_cuda_compiler_versionNonefloat_prechigh" alt="variant">
                 </a>
               </td>
             </tr><tr>
-              <td>linux_cuda_compiler_versionNonefloat_preclow</td>
+              <td>linux_64_cuda_compiler_versionNonefloat_preclow</td>
               <td>
                 <a href="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_build/latest?definitionId=3&branchName=master">
-                  <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=master&jobName=linux&configuration=linux_cuda_compiler_versionNonefloat_preclow" alt="variant">
+                  <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=master&jobName=linux&configuration=linux_64_cuda_compiler_versionNonefloat_preclow" alt="variant">
                 </a>
               </td>
             </tr>
           </tbody>
         </table>
       </details>
-    </td>
-  </tr>
-  <tr>
-    <td>OSX</td>
-    <td>
-      <img src="https://img.shields.io/badge/OSX-disabled-lightgrey.svg" alt="OSX disabled">
-    </td>
-  </tr>
-  <tr>
-    <td>Windows</td>
-    <td>
-      <img src="https://img.shields.io/badge/Windows-disabled-lightgrey.svg" alt="Windows disabled">
-    </td>
-  </tr>
-  <tr>
-    <td>Linux_ppc64le</td>
-    <td>
-      <img src="https://img.shields.io/badge/ppc64le-disabled-lightgrey.svg" alt="ppc64le disabled">
     </td>
   </tr>
 </table>
@@ -121,6 +103,7 @@ Current release info
 | Name | Downloads | Version | Platforms |
 | --- | --- | --- | --- |
 | [![Conda Recipe](https://img.shields.io/badge/recipe-lammps--dp-green.svg)](https://anaconda.org/deepmodeling/lammps-dp) | [![Conda Downloads](https://img.shields.io/conda/dn/deepmodeling/lammps-dp.svg)](https://anaconda.org/deepmodeling/lammps-dp) | [![Conda Version](https://img.shields.io/conda/vn/deepmodeling/lammps-dp.svg)](https://anaconda.org/deepmodeling/lammps-dp) | [![Conda Platforms](https://img.shields.io/conda/pn/deepmodeling/lammps-dp.svg)](https://anaconda.org/deepmodeling/lammps-dp) |
+| [![Conda Recipe](https://img.shields.io/badge/recipe-liblammps--dp-green.svg)](https://anaconda.org/deepmodeling/liblammps-dp) | [![Conda Downloads](https://img.shields.io/conda/dn/deepmodeling/liblammps-dp.svg)](https://anaconda.org/deepmodeling/liblammps-dp) | [![Conda Version](https://img.shields.io/conda/vn/deepmodeling/liblammps-dp.svg)](https://anaconda.org/deepmodeling/liblammps-dp) | [![Conda Platforms](https://img.shields.io/conda/pn/deepmodeling/liblammps-dp.svg)](https://anaconda.org/deepmodeling/liblammps-dp) |
 
 Installing lammps-dp
 ====================
@@ -131,10 +114,10 @@ Installing `lammps-dp` from the `deepmodeling` channel can be achieved by adding
 conda config --add channels deepmodeling
 ```
 
-Once the `deepmodeling` channel has been enabled, `lammps-dp` can be installed with:
+Once the `deepmodeling` channel has been enabled, `lammps-dp, liblammps-dp` can be installed with:
 
 ```
-conda install lammps-dp
+conda install lammps-dp liblammps-dp
 ```
 
 It is possible to list all of the versions of `lammps-dp` available on your platform with:
