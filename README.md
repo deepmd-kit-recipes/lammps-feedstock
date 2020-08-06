@@ -1,5 +1,5 @@
-About lammps-dp
-===============
+About lammps-dp-and-library
+===========================
 
 Home: http://lammps.sandia.gov
 
@@ -105,10 +105,10 @@ Current release info
 | [![Conda Recipe](https://img.shields.io/badge/recipe-lammps--dp-green.svg)](https://anaconda.org/deepmodeling/lammps-dp) | [![Conda Downloads](https://img.shields.io/conda/dn/deepmodeling/lammps-dp.svg)](https://anaconda.org/deepmodeling/lammps-dp) | [![Conda Version](https://img.shields.io/conda/vn/deepmodeling/lammps-dp.svg)](https://anaconda.org/deepmodeling/lammps-dp) | [![Conda Platforms](https://img.shields.io/conda/pn/deepmodeling/lammps-dp.svg)](https://anaconda.org/deepmodeling/lammps-dp) |
 | [![Conda Recipe](https://img.shields.io/badge/recipe-liblammps--dp-green.svg)](https://anaconda.org/deepmodeling/liblammps-dp) | [![Conda Downloads](https://img.shields.io/conda/dn/deepmodeling/liblammps-dp.svg)](https://anaconda.org/deepmodeling/liblammps-dp) | [![Conda Version](https://img.shields.io/conda/vn/deepmodeling/liblammps-dp.svg)](https://anaconda.org/deepmodeling/liblammps-dp) | [![Conda Platforms](https://img.shields.io/conda/pn/deepmodeling/liblammps-dp.svg)](https://anaconda.org/deepmodeling/liblammps-dp) |
 
-Installing lammps-dp
-====================
+Installing lammps-dp-and-library
+================================
 
-Installing `lammps-dp` from the `deepmodeling` channel can be achieved by adding `deepmodeling` to your channels with:
+Installing `lammps-dp-and-library` from the `deepmodeling` channel can be achieved by adding `deepmodeling` to your channels with:
 
 ```
 conda config --add channels deepmodeling
@@ -129,17 +129,17 @@ conda search lammps-dp --channel deepmodeling
 
 
 
-Updating lammps-dp-feedstock
-============================
+Updating lammps-dp-and-library-feedstock
+========================================
 
-If you would like to improve the lammps-dp recipe or build a new
+If you would like to improve the lammps-dp-and-library recipe or build a new
 package version, please fork this repository and submit a PR. Upon submission,
 your changes will be run on the appropriate platforms to give the reviewer an
 opportunity to confirm that the changes result in a successful build. Once
 merged, the recipe will be re-built and uploaded automatically to the
 `deepmodeling` channel, whereupon the built conda packages will be available for
 everybody to install and use from the `deepmodeling` channel.
-Note that all branches in the deepmd-kit-recipes/lammps-dp-feedstock are
+Note that all branches in the deepmd-kit-recipes/lammps-dp-and-library-feedstock are
 immediately built and any created packages are uploaded, so PRs should be based
 on branches in forks and branches in the main repository should only be used to
 build distinct package versions.
