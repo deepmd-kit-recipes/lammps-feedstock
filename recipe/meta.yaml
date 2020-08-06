@@ -70,7 +70,7 @@ outputs:
         - jpeg
     test:
       commands:
-        - test -f lib/liblammps.so
+        - test -f $PREFIX/lib/liblammps.so
       
   - name: lammps-dp
     files:
