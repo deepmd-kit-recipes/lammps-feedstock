@@ -104,6 +104,7 @@ Current release info
 | --- | --- | --- | --- |
 | [![Conda Recipe](https://img.shields.io/badge/recipe-lammps--dp-green.svg)](https://anaconda.org/deepmodeling/lammps-dp) | [![Conda Downloads](https://img.shields.io/conda/dn/deepmodeling/lammps-dp.svg)](https://anaconda.org/deepmodeling/lammps-dp) | [![Conda Version](https://img.shields.io/conda/vn/deepmodeling/lammps-dp.svg)](https://anaconda.org/deepmodeling/lammps-dp) | [![Conda Platforms](https://img.shields.io/conda/pn/deepmodeling/lammps-dp.svg)](https://anaconda.org/deepmodeling/lammps-dp) |
 | [![Conda Recipe](https://img.shields.io/badge/recipe-liblammps--dp-green.svg)](https://anaconda.org/deepmodeling/liblammps-dp) | [![Conda Downloads](https://img.shields.io/conda/dn/deepmodeling/liblammps-dp.svg)](https://anaconda.org/deepmodeling/liblammps-dp) | [![Conda Version](https://img.shields.io/conda/vn/deepmodeling/liblammps-dp.svg)](https://anaconda.org/deepmodeling/liblammps-dp) | [![Conda Platforms](https://img.shields.io/conda/pn/deepmodeling/liblammps-dp.svg)](https://anaconda.org/deepmodeling/liblammps-dp) |
+| [![Conda Recipe](https://img.shields.io/badge/recipe-pylammps--dp-green.svg)](https://anaconda.org/deepmodeling/pylammps-dp) | [![Conda Downloads](https://img.shields.io/conda/dn/deepmodeling/pylammps-dp.svg)](https://anaconda.org/deepmodeling/pylammps-dp) | [![Conda Version](https://img.shields.io/conda/vn/deepmodeling/pylammps-dp.svg)](https://anaconda.org/deepmodeling/pylammps-dp) | [![Conda Platforms](https://img.shields.io/conda/pn/deepmodeling/pylammps-dp.svg)](https://anaconda.org/deepmodeling/pylammps-dp) |
 
 Installing lammps-dp-and-library
 ================================
@@ -114,10 +115,10 @@ Installing `lammps-dp-and-library` from the `deepmodeling` channel can be achiev
 conda config --add channels deepmodeling
 ```
 
-Once the `deepmodeling` channel has been enabled, `lammps-dp, liblammps-dp` can be installed with:
+Once the `deepmodeling` channel has been enabled, `lammps-dp, liblammps-dp, pylammps-dp` can be installed with:
 
 ```
-conda install lammps-dp liblammps-dp
+conda install lammps-dp liblammps-dp pylammps-dp
 ```
 
 It is possible to list all of the versions of `lammps-dp` available on your platform with:
