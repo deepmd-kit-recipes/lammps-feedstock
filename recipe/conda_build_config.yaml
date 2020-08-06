@@ -10,3 +10,5 @@ channel_sources:
 - deepmodeling,defaults
 channel_targets:
 - deepmodeling main
+python:
+- 3.8
