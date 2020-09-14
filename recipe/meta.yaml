@@ -1,5 +1,5 @@
 {% set name = "lammps-dp-and-library" %}
-{% set version = "1.2.1" %}
+{% set version = "1.2.2" %}
 {% set lammps = "stable_3Mar2020" %}
 {% if cuda_compiler_version == "None" %}
 {% set dp_variant = "cpu" %}
