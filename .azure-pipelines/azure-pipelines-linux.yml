@@ -40,7 +40,6 @@ jobs:
         CONFIG: linux_64_cuda_compiler_versionNonefloat_preclow
         UPLOAD_PACKAGES: 'True'
         DOCKER_IMAGE: condaforge/linux-anvil-comp7
-    maxParallel: 8
   timeoutInMinutes: 360
 
   steps:
