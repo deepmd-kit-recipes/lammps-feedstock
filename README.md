@@ -5,9 +5,13 @@ Home: http://lammps.sandia.gov
 
 Package license: GPL-2.0
 
-Feedstock license: BSD-3-Clause
+Feedstock license: [BSD-3-Clause](https://github.com/deepmd-kit-recipes/lammps-dp-feedstock/blob/master/LICENSE.txt)
 
 Summary: LAMMPS stands for Large-scale Atomic/Molecular Massively Parallel Simulator.
+
+Development: https://github.com/lammps/lammps
+
+Documentation: http://lammps.sandia.gov/doc/Manual.html
 
 LAMMPS is a classical molecular dynamics simulation code designed to
 run efficiently on parallel computers.  It was developed at Sandia
