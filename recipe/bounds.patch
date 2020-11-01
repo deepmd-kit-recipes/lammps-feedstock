@@ -1,7 +1,7 @@
 diff --git a/source/lmp/pair_nnp.cpp b/source/lmp/pair_nnp.cpp
 index ba3dcd3..a3a5b73 100644
---- a/source/lmp/pair_nnp.cpp
-+++ b/source/lmp/pair_nnp.cpp
+--- a/src/USER-DEEPMD/pair_nnp.cpp
++++ b/src/USER-DEEPMD/pair_nnp.cpp
 @@ -16,6 +16,8 @@
  #include "modify.h"
  #include "fix.h"
