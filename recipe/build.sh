@@ -1,7 +1,6 @@
 #!/bin/bash
 
 cp -r ${PREFIX}/share/USER-DEEPMD src/
-patch -p1 < ${RECIPE_DIR}/bounds.patch
 make -C src lib-plumed args="-p $PREFIX -m runtime"
 mkdir build
 cd build
