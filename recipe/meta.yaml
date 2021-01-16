@@ -1,6 +1,6 @@
 {% set name = "lammps-dp-and-library" %}
-{% set version = "1.3.1" %}
-{% set lammps = "stable_29Oct2020" %}
+{% set version = "1.2.2" %}
+{% set lammps = "cvhd" %}
 {% if cuda_compiler_version == "None" %}
 {% set dp_variant = "cpu" %}
 {% else %}
@@ -12,7 +12,7 @@ package:
   version: {{ version }}
 
 source:
-  url: https://github.com/lammps/lammps/archive/{{ lammps }}.tar.gz
+  url: https://github.com/njzjz/lammps/archive/{{ lammps }}.tar.gz
   #sha256: 5380c1689a93d7922e3d65d9c186401d429878bb3cbe9a692580d3470d6a253f
   patches: 
     - deepmd.patch
