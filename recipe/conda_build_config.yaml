@@ -23,6 +23,10 @@ zip_keys:
     - cuda_compiler_version
     - docker_image
     - cdt_name
+c_compiler_version:
+- 7
+cxx_compiler_version:
+- 7
 
 float_prec:
 - low
