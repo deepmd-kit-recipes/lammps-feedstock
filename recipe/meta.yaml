@@ -18,7 +18,7 @@ source:
     - deepmd.patch
     
 build:
-  number: 0
+  number: 1
   string: "{{ PKG_BUILDNUM }}_cuda{{ cuda_compiler_version }}_{{ dp_variant }}"  # [float_prec == 'high']
   string: "{{ PKG_BUILDNUM }}_cuda{{ cuda_compiler_version }}_{{ dp_variant }}_{{float_prec}}"  # [float_prec != 'high']
   noarch: python
@@ -44,36 +44,41 @@ requirements:
     - jpeg
 
 outputs:
-  - name: liblammps-dp
+  - name: liblammps-dp-base
+    build:
+      string: "{{ PKG_BUILDNUM }}"  # [float_prec == 'high']
+      string: "{{ PKG_BUILDNUM }}_{{float_prec}}"  # [float_prec != 'high']
     files:
       - lib/liblammps.so*
       - lib/pkgconfig/liblammps.pc
       - share/cmake/Modules/FindLAMMPS.cmake
       - share/lammps
       - share/man/man1/lmp*
+    test:
+      commands:
+        - test -f $PREFIX/lib/liblammps.so
+  - name: liblammps-dp
     requirements:
       host:
-        - libdeepmd {{ version }} *{{ dp_variant }}  # [float_prec == 'high']
-        - libdeepmd {{ version }} *{{ dp_variant }}_{{ float_prec }}  # [float_prec != 'high'] 
-        - cudatoolkit {{ cuda_compiler_version }}* # [cuda_compiler_version != 'None']
         - plumed
         - mpich
         - zlib
         - fftw
         - libpng
         - jpeg
+        - libdeepmd {{ version }} *{{ dp_variant }}  # [float_prec == 'high']
+        - libdeepmd {{ version }} *{{ dp_variant }}_{{ float_prec }}  # [float_prec != 'high'] 
+        - cudatoolkit {{ cuda_compiler_version }}* # [cuda_compiler_version != 'None']
+        - {{ pin_subpackage('liblammps-dp-base', exact=True) }}
       run:
         - {{ pin_compatible('libdeepmd', exact=True) }}
-        - {{ pin_compatible('mpich') }}
         - {{ pin_compatible('cudatoolkit', max_pin='x.x') }} # [cuda_compiler_version != 'None']
+        - {{ pin_subpackage('liblammps-dp-base', exact=True) }}
+        - {{ pin_compatible('mpich') }}
         - plumed >=2
         - fftw
         - libpng
         - jpeg
-    test:
-      commands:
-        - test -f $PREFIX/lib/liblammps.so
-      
   - name: lammps-dp
     files:
       - bin/lmp
