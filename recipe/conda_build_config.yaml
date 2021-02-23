@@ -3,6 +3,27 @@ cuda_compiler_version:
 - 9.2
 - 10.0
 - 10.1
+cudnn:
+- undefined
+- 7
+- 7
+- 7
+cdt_name:
+- cos6
+- cos6
+- cos6
+- cos6
+docker_image:
+- quay.io/condaforge/linux-anvil-comp7
+- quay.io/condaforge/linux-anvil-cuda:9.2 
+- quay.io/condaforge/linux-anvil-cuda:10.0 
+- quay.io/condaforge/linux-anvil-cuda:10.1 
+zip_keys:
+  - - cudnn
+    - cuda_compiler_version
+    - docker_image
+    - cdt_name
+
 float_prec:
 - low
 - high
