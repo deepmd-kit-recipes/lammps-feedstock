@@ -1,6 +1,7 @@
 {% set name = "lammps-dp-and-library" %}
 {% set version = "1.2.3" %}
-{% set lammps = "stable_29Oct2020" %}
+{% set lammps = "stable_3Mar2020" %}
+>>>>>>> parent of 115a363... bump lammps version to stable_29Oct2020
 {% if cuda_compiler_version == "None" %}
 {% set dp_variant = "cpu" %}
 {% else %}
@@ -18,7 +19,7 @@ source:
     - deepmd.patch
     
 build:
-  number: 1
+  number: 0
   string: "{{ PKG_BUILDNUM }}_cuda{{ cuda_compiler_version }}_{{ dp_variant }}"  # [float_prec == 'high']
   string: "{{ PKG_BUILDNUM }}_cuda{{ cuda_compiler_version }}_{{ dp_variant }}_{{float_prec}}"  # [float_prec != 'high']
   noarch: python
