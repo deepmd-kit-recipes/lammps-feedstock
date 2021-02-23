@@ -48,6 +48,24 @@ outputs:
     build:
       string: "{{ PKG_BUILDNUM }}"  # [float_prec == 'high']
       string: "{{ PKG_BUILDNUM }}_{{float_prec}}"  # [float_prec != 'high']
+    requirements:
+      build:
+        - {{ compiler('c') }}
+        - {{ compiler('cxx') }}
+      host:
+        - plumed
+        - mpich
+        - zlib
+        - fftw
+        - libpng
+        - jpeg
+      run:
+        - libdeepmd {{ version }}
+        - {{ pin_compatible('mpich') }}
+        - plumed >=2
+        - fftw
+        - libpng
+        - jpeg
     files:
       - lib/liblammps.so*
       - lib/pkgconfig/liblammps.pc
@@ -60,12 +78,6 @@ outputs:
   - name: liblammps-dp
     requirements:
       host:
-        - plumed
-        - mpich
-        - zlib
-        - fftw
-        - libpng
-        - jpeg
         - libdeepmd {{ version }} *{{ dp_variant }}  # [float_prec == 'high']
         - libdeepmd {{ version }} *{{ dp_variant }}_{{ float_prec }}  # [float_prec != 'high'] 
         - cudatoolkit {{ cuda_compiler_version }}* # [cuda_compiler_version != 'None']
@@ -74,11 +86,6 @@ outputs:
         - {{ pin_compatible('libdeepmd', exact=True) }}
         - {{ pin_compatible('cudatoolkit', max_pin='x.x') }} # [cuda_compiler_version != 'None']
         - {{ pin_subpackage('liblammps-dp-base', exact=True) }}
-        - {{ pin_compatible('mpich') }}
-        - plumed >=2
-        - fftw
-        - libpng
-        - jpeg
   - name: lammps-dp
     files:
       - bin/lmp
