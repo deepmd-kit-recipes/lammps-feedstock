@@ -1,7 +1,6 @@
 {% set name = "lammps-dp-and-library" %}
 {% set version = "1.2.3" %}
 {% set lammps = "stable_3Mar2020" %}
->>>>>>> parent of 115a363... bump lammps version to stable_29Oct2020
 {% if cuda_compiler_version == "None" %}
 {% set dp_variant = "cpu" %}
 {% else %}
