@@ -36,7 +36,7 @@ requirements:
     - libdeepmd {{ version }} *{{ dp_variant }}  # [float_prec == 'high']
     - libdeepmd {{ version }} *{{ dp_variant }}_{{ float_prec }}  # [float_prec != 'high'] 
     - cudatoolkit {{ cuda_compiler_version }}* # [cuda_compiler_version != 'None']
-    - plumed
+    - plumed >=2.4,<2.7
     - mpich
     - zlib
     - fftw
