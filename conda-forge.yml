@@ -4,3 +4,4 @@ channels:
   targets:
     -
       - deepmodeling
+channel_priority: flexible
