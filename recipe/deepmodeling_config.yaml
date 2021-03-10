@@ -3,29 +3,21 @@ cuda_compiler_version:
 - 9.2
 - 10.0
 - 10.1
-- 11.0
-- 11.1
 cudnn:
 - undefined
 - 7
 - 7
 - 7
-- 8
-- 8
 cdt_name:
 - cos6
 - cos6
 - cos6
 - cos6
-- cos7
-- cos7
 docker_image:
 - quay.io/condaforge/linux-anvil-comp7
 - quay.io/condaforge/linux-anvil-cuda:9.2 
 - quay.io/condaforge/linux-anvil-cuda:10.0 
 - quay.io/condaforge/linux-anvil-cuda:10.1 
-- quay.io/condaforge/linux-anvil-cuda:11.0 
-- quay.io/condaforge/linux-anvil-cuda:11.1 
 zip_keys:
   - - cudnn
     - cuda_compiler_version
@@ -35,15 +27,11 @@ c_compiler_version:
 - 7
 cxx_compiler_version:
 - 7
-
-float_prec:
-- low
-- high
 channel_sources:
 - deepmodeling,defaults
 channel_targets:
 - deepmodeling main
 python:
-- 3.6
 - 3.7
 - 3.8
+- 3.9
