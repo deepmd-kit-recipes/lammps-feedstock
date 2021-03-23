@@ -1,5 +1,5 @@
 {% set name = "lammps-dp-and-library" %}
-{% set version = "1.3.2" %}
+{% set version = "1.3.3" %}
 {% set lammps = "stable_29Oct2020" %}
 {% if cuda_compiler_version == "None" %}
 {% set dp_variant = "cpu" %}
@@ -16,9 +16,10 @@ source:
   #sha256: 5380c1689a93d7922e3d65d9c186401d429878bb3cbe9a692580d3470d6a253f
   patches: 
     - deepmd.patch
+    - c6fb9c3836c127fdac0b8284020dcc48f304cfdc.diff
     
 build:
-  number: 2
+  number: 0
   string: "{{ PKG_BUILDNUM }}_cuda{{ cuda_compiler_version }}_{{ dp_variant }}"  # [float_prec == 'high']
   string: "{{ PKG_BUILDNUM }}_cuda{{ cuda_compiler_version }}_{{ dp_variant }}_{{float_prec}}"  # [float_prec != 'high']
   noarch: python
