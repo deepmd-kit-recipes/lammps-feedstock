@@ -5,9 +5,9 @@ c_compiler_version:
 cdt_name:
 - cos7
 channel_sources:
-- deepmodeling,defaults,nvidia
+- deepmodeling/label/dev,deepmodeling,defaults,nvidia
 channel_targets:
-- deepmodeling main
+- deepmodeling dev
 cuda_compiler:
 - nvcc
 cuda_compiler_version:
