@@ -146,6 +146,7 @@ Installing `lammps-dp-and-library` from the `deepmodeling` channel can be achiev
 
 ```
 conda config --add channels deepmodeling
+conda config --set channel_priority strict
 ```
 
 Once the `deepmodeling` channel has been enabled, `lammps-dp, liblammps-dp, liblammps-dp-base, pylammps-dp` can be installed with:
