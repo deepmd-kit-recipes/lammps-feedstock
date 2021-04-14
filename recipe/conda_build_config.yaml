@@ -40,9 +40,9 @@ float_prec:
 - low
 - high
 channel_sources:
-- deepmodeling,defaults,nvidia
+- deepmodeling/label/dev,deepmodeling,defaults,nvidia
 channel_targets:
-- deepmodeling main
+- deepmodeling dev
 python:
 - 3.6
 - 3.7
