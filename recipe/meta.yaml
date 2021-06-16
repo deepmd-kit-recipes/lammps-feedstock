@@ -1,5 +1,5 @@
 {% set name = "lammps-dp-and-library" %}
-{% set version = "2.0.0.b1" %}
+{% set version = "2.0.0.b2" %}
 {% set lammps = "stable_29Oct2020" %}
 {% if cuda_compiler_version == "None" %}
 {% set dp_variant = "cpu" %}
@@ -37,7 +37,7 @@ requirements:
     - libdeepmd {{ version }} *{{ dp_variant }}  # [float_prec == 'high']
     - libdeepmd {{ version }} *{{ dp_variant }}_{{ float_prec }}  # [float_prec != 'high'] 
     - cudatoolkit {{ cuda_compiler_version }}* # [cuda_compiler_version != 'None']
-    - plumed >=2.4,<2.7
+    - plumed >=2.4,<2.8
     - mpich
     - zlib
     - fftw

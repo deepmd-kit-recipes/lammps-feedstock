@@ -5,25 +5,17 @@
 jobs:
 - job: linux
   pool:
-    vmImage: ubuntu-16.04
+    vmImage: ubuntu-latest
   strategy:
     matrix:
-      linux_64_cuda_compiler_version10.0float_prechigh:
-        CONFIG: linux_64_cuda_compiler_version10.0float_prechigh
-        UPLOAD_PACKAGES: 'True'
-        DOCKER_IMAGE: quay.io/condaforge/linux-anvil-cuda:10.0
-      linux_64_cuda_compiler_version10.0float_preclow:
-        CONFIG: linux_64_cuda_compiler_version10.0float_preclow
-        UPLOAD_PACKAGES: 'True'
-        DOCKER_IMAGE: quay.io/condaforge/linux-anvil-cuda:10.0
       linux_64_cuda_compiler_version10.1float_prechigh:
         CONFIG: linux_64_cuda_compiler_version10.1float_prechigh
         UPLOAD_PACKAGES: 'True'
-        DOCKER_IMAGE: quay.io/condaforge/linux-anvil-cuda:10.1
+        DOCKER_IMAGE: quay.io/condaforge/linux-anvil-cos7-cuda:10.1
       linux_64_cuda_compiler_version10.1float_preclow:
         CONFIG: linux_64_cuda_compiler_version10.1float_preclow
         UPLOAD_PACKAGES: 'True'
-        DOCKER_IMAGE: quay.io/condaforge/linux-anvil-cuda:10.1
+        DOCKER_IMAGE: quay.io/condaforge/linux-anvil-cos7-cuda:10.1
       linux_64_cuda_compiler_version11.0float_prechigh:
         CONFIG: linux_64_cuda_compiler_version11.0float_prechigh
         UPLOAD_PACKAGES: 'True'
@@ -40,22 +32,14 @@ jobs:
         CONFIG: linux_64_cuda_compiler_version11.1float_preclow
         UPLOAD_PACKAGES: 'True'
         DOCKER_IMAGE: quay.io/condaforge/linux-anvil-cuda:11.1
-      linux_64_cuda_compiler_version9.2float_prechigh:
-        CONFIG: linux_64_cuda_compiler_version9.2float_prechigh
-        UPLOAD_PACKAGES: 'True'
-        DOCKER_IMAGE: quay.io/condaforge/linux-anvil-cuda:9.2
-      linux_64_cuda_compiler_version9.2float_preclow:
-        CONFIG: linux_64_cuda_compiler_version9.2float_preclow
-        UPLOAD_PACKAGES: 'True'
-        DOCKER_IMAGE: quay.io/condaforge/linux-anvil-cuda:9.2
       linux_64_cuda_compiler_versionNonefloat_prechigh:
         CONFIG: linux_64_cuda_compiler_versionNonefloat_prechigh
         UPLOAD_PACKAGES: 'True'
-        DOCKER_IMAGE: quay.io/condaforge/linux-anvil-comp7
+        DOCKER_IMAGE: quay.io/condaforge/linux-anvil-cos7-x86_64
       linux_64_cuda_compiler_versionNonefloat_preclow:
         CONFIG: linux_64_cuda_compiler_versionNonefloat_preclow
         UPLOAD_PACKAGES: 'True'
-        DOCKER_IMAGE: quay.io/condaforge/linux-anvil-comp7
+        DOCKER_IMAGE: quay.io/condaforge/linux-anvil-cos7-x86_64
   timeoutInMinutes: 360
 
   steps:
