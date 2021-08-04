@@ -1,11 +1,6 @@
 {% set name = "lammps-dp-and-library" %}
-{% set version = "2.0.0.b3" %}
+{% set version = "2.0.0.b4" %}
 {% set lammps = "stable_29Oct2020" %}
-{% if cuda_compiler_version == "None" %}
-{% set dp_variant = "cpu" %}
-{% else %}
-{% set dp_variant = "gpu" %}
-{% endif %}
 
 package:
   name: {{ name|lower }}
@@ -20,9 +15,6 @@ source:
     
 build:
   number: 0
-  string: "{{ PKG_BUILDNUM }}_cuda{{ cuda_compiler_version }}_{{ dp_variant }}"  # [float_prec == 'high']
-  string: "{{ PKG_BUILDNUM }}_cuda{{ cuda_compiler_version }}_{{ dp_variant }}_{{float_prec}}"  # [float_prec != 'high']
-  noarch: python
   skip: True  # [not linux]
 
 requirements:
@@ -33,10 +25,8 @@ requirements:
     - make
   
   host:
-    - python
-    - libdeepmd {{ version }} *{{ dp_variant }}  # [float_prec == 'high']
-    - libdeepmd {{ version }} *{{ dp_variant }}_{{ float_prec }}  # [float_prec != 'high'] 
-    - cudatoolkit {{ cuda_compiler_version }}* # [cuda_compiler_version != 'None']
+    - python >=3
+    - libdeepmd {{ version }}
     - plumed >=2.4,<2.8
     - mpich
     - zlib
@@ -44,85 +34,20 @@ requirements:
     - libpng
     - jpeg
 
-outputs:
-  - name: liblammps-dp-base
-    build:
-      string: "{{ PKG_BUILDNUM }}"  # [float_prec == 'high']
-      string: "{{ PKG_BUILDNUM }}_{{float_prec}}"  # [float_prec != 'high']
-    requirements:
-      build:
-        - {{ compiler('c') }}
-        - {{ compiler('cxx') }}
-      host:
-        - plumed
-        - mpich
-        - zlib
-        - fftw
-        - libpng
-        - jpeg
-      run:
-        - libdeepmd {{ version }}
-        - {{ pin_compatible('mpich') }}
-        - plumed >=2
-        - fftw
-        - libpng
-        - jpeg
-    files:
-      - lib/liblammps.so*
-      - lib/pkgconfig/liblammps.pc
-      - share/cmake/Modules/FindLAMMPS.cmake
-      - share/lammps
-      - share/man/man1/lmp*
-    test:
-      commands:
-        - test -f $PREFIX/lib/liblammps.so
-  - name: liblammps-dp
-    requirements:
-      host:
-        - libdeepmd {{ version }} *{{ dp_variant }}  # [float_prec == 'high']
-        - libdeepmd {{ version }} *{{ dp_variant }}_{{ float_prec }}  # [float_prec != 'high'] 
-        - cudatoolkit {{ cuda_compiler_version }}* # [cuda_compiler_version != 'None']
-        - {{ pin_subpackage('liblammps-dp-base', exact=True) }}
-      run:
-        - {{ pin_compatible('libdeepmd', exact=True) }}
-        - {{ pin_compatible('cudatoolkit', max_pin='x.x') }} # [cuda_compiler_version != 'None']
-        - {{ pin_subpackage('liblammps-dp-base', exact=True) }}
-  - name: lammps-dp
-    files:
-      - bin/lmp
-    requirements:
-      build:
-        - {{ compiler('c') }}
-        - {{ compiler('cxx') }}
-      host:
-        - {{ pin_subpackage('liblammps-dp', exact=True) }}
-      run:
-        - {{ pin_subpackage('liblammps-dp', exact=True) }}
-    test:
-      #files:
-        #- input.lammps
-        #- water.lmp
-        #- frozen_model.pb  # [float_prec == 'high']
-        #- frozen_model_low.pb  # [float_prec == 'low']
-      commands: 
-        - lmp -help
-        #- mv frozen_model_low.pb frozen_model.pb  # [float_prec == 'low']
-        #- lmp -in input.lammps
+  run:
+    - libdeepmd >={{ version }}
+    - {{ pin_compatible('mpich') }}
+    - plumed >=2
+    - fftw
+    - libpng
+    - jpeg
 
-  - name: pylammps-dp
-    build:
-      noarch: python
-    files:
-      - lib/python*/site-packages/lammps.py
-    requirements:
-      host:
-        - python
-      run:
-        - python
-        - {{ pin_subpackage('liblammps-dp', max_pin='x.x') }}
-    test:
-      imports:
-        - lammps
+test:
+  commands:
+    - lmp -help
+    - test -f $PREFIX/lib/liblammps.so
+  imports:
+    - lammps
 
 about:
   home: http://lammps.sandia.gov
