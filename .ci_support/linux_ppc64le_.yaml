@@ -5,9 +5,10 @@ c_compiler_version:
 cdt_name:
 - cos7
 channel_sources:
-- deepmodeling,https://deepmodeling.njzjz.win,defaults,conda-forge
+- deepmodeling/label/dev,deepmodeling,https://deepmodeling.njzjz.win,defaults
+- deepmodeling/label/dev,deepmodeling,https://deepmodeling.njzjz.win,defaults,conda-forge
 channel_targets:
-- deepmodeling main
+- deepmodeling dev
 cxx_compiler:
 - gxx
 cxx_compiler_version:
