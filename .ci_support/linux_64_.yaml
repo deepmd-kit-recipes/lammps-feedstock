@@ -6,7 +6,6 @@ cdt_name:
 - cos7
 channel_sources:
 - deepmodeling/label/dev,deepmodeling,https://deepmodeling.njzjz.win,defaults
-- deepmodeling/label/dev,deepmodeling,https://deepmodeling.njzjz.win,defaults,conda-forge
 channel_targets:
 - deepmodeling dev
 cxx_compiler:
