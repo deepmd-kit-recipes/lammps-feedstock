@@ -15,6 +15,7 @@ cd ..
 
 # lmp_low
 patch -p1 < ${RECIPE_DIR}/0001-low-precesion.patch
+ln -s lammps.py python/lammps_low.py
 mkdir build_low
 cd build_low
 cmake -D CMAKE_BUILD_TYPE=Release -D BUILD_LIB=on -D BUILD_SHARED_LIBS=on -DCMAKE_INSTALL_LIBDIR=lib $ARGS -D PKG_USER-DEEPMD=ON -D FFT=FFTW3 -D CMAKE_INSTALL_PREFIX=${PREFIX} -D CMAKE_CXX_FLAGS="-I${PREFIX}/include -L${PREFIX}/lib -Wl,--no-as-needed -lrt -ldeepmd_op -ldeepmd -ldeepmd_cc_low -ltensorflow_cc -ltensorflow_framework -Wl,-rpath=${PREFIX}/lib" ../cmake
