@@ -38,59 +38,17 @@ Current build status
         <table>
           <thead><tr><th>Variant</th><th>Status</th></tr></thead>
           <tbody><tr>
-              <td>linux_64_cuda_compiler_version10.1float_prechigh</td>
+              <td>linux_64</td>
               <td>
                 <a href="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_build/latest?definitionId=3&branchName=master">
-                  <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=master&jobName=linux&configuration=linux_64_cuda_compiler_version10.1float_prechigh" alt="variant">
+                  <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=master&jobName=linux&configuration=linux_64_" alt="variant">
                 </a>
               </td>
             </tr><tr>
-              <td>linux_64_cuda_compiler_version10.1float_preclow</td>
+              <td>linux_ppc64le</td>
               <td>
                 <a href="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_build/latest?definitionId=3&branchName=master">
-                  <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=master&jobName=linux&configuration=linux_64_cuda_compiler_version10.1float_preclow" alt="variant">
-                </a>
-              </td>
-            </tr><tr>
-              <td>linux_64_cuda_compiler_version11.0float_prechigh</td>
-              <td>
-                <a href="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_build/latest?definitionId=3&branchName=master">
-                  <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=master&jobName=linux&configuration=linux_64_cuda_compiler_version11.0float_prechigh" alt="variant">
-                </a>
-              </td>
-            </tr><tr>
-              <td>linux_64_cuda_compiler_version11.0float_preclow</td>
-              <td>
-                <a href="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_build/latest?definitionId=3&branchName=master">
-                  <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=master&jobName=linux&configuration=linux_64_cuda_compiler_version11.0float_preclow" alt="variant">
-                </a>
-              </td>
-            </tr><tr>
-              <td>linux_64_cuda_compiler_version11.1float_prechigh</td>
-              <td>
-                <a href="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_build/latest?definitionId=3&branchName=master">
-                  <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=master&jobName=linux&configuration=linux_64_cuda_compiler_version11.1float_prechigh" alt="variant">
-                </a>
-              </td>
-            </tr><tr>
-              <td>linux_64_cuda_compiler_version11.1float_preclow</td>
-              <td>
-                <a href="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_build/latest?definitionId=3&branchName=master">
-                  <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=master&jobName=linux&configuration=linux_64_cuda_compiler_version11.1float_preclow" alt="variant">
-                </a>
-              </td>
-            </tr><tr>
-              <td>linux_64_cuda_compiler_versionNonefloat_prechigh</td>
-              <td>
-                <a href="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_build/latest?definitionId=3&branchName=master">
-                  <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=master&jobName=linux&configuration=linux_64_cuda_compiler_versionNonefloat_prechigh" alt="variant">
-                </a>
-              </td>
-            </tr><tr>
-              <td>linux_64_cuda_compiler_versionNonefloat_preclow</td>
-              <td>
-                <a href="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_build/latest?definitionId=3&branchName=master">
-                  <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=master&jobName=linux&configuration=linux_64_cuda_compiler_versionNonefloat_preclow" alt="variant">
+                  <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=master&jobName=linux&configuration=linux_ppc64le_" alt="variant">
                 </a>
               </td>
             </tr>
@@ -106,10 +64,7 @@ Current release info
 
 | Name | Downloads | Version | Platforms |
 | --- | --- | --- | --- |
-| [![Conda Recipe](https://img.shields.io/badge/recipe-lammps--dp-green.svg)](https://anaconda.org/deepmodeling/lammps-dp) | [![Conda Downloads](https://img.shields.io/conda/dn/deepmodeling/lammps-dp.svg)](https://anaconda.org/deepmodeling/lammps-dp) | [![Conda Version](https://img.shields.io/conda/vn/deepmodeling/lammps-dp.svg)](https://anaconda.org/deepmodeling/lammps-dp) | [![Conda Platforms](https://img.shields.io/conda/pn/deepmodeling/lammps-dp.svg)](https://anaconda.org/deepmodeling/lammps-dp) |
-| [![Conda Recipe](https://img.shields.io/badge/recipe-liblammps--dp-green.svg)](https://anaconda.org/deepmodeling/liblammps-dp) | [![Conda Downloads](https://img.shields.io/conda/dn/deepmodeling/liblammps-dp.svg)](https://anaconda.org/deepmodeling/liblammps-dp) | [![Conda Version](https://img.shields.io/conda/vn/deepmodeling/liblammps-dp.svg)](https://anaconda.org/deepmodeling/liblammps-dp) | [![Conda Platforms](https://img.shields.io/conda/pn/deepmodeling/liblammps-dp.svg)](https://anaconda.org/deepmodeling/liblammps-dp) |
-| [![Conda Recipe](https://img.shields.io/badge/recipe-liblammps--dp--base-green.svg)](https://anaconda.org/deepmodeling/liblammps-dp-base) | [![Conda Downloads](https://img.shields.io/conda/dn/deepmodeling/liblammps-dp-base.svg)](https://anaconda.org/deepmodeling/liblammps-dp-base) | [![Conda Version](https://img.shields.io/conda/vn/deepmodeling/liblammps-dp-base.svg)](https://anaconda.org/deepmodeling/liblammps-dp-base) | [![Conda Platforms](https://img.shields.io/conda/pn/deepmodeling/liblammps-dp-base.svg)](https://anaconda.org/deepmodeling/liblammps-dp-base) |
-| [![Conda Recipe](https://img.shields.io/badge/recipe-pylammps--dp-green.svg)](https://anaconda.org/deepmodeling/pylammps-dp) | [![Conda Downloads](https://img.shields.io/conda/dn/deepmodeling/pylammps-dp.svg)](https://anaconda.org/deepmodeling/pylammps-dp) | [![Conda Version](https://img.shields.io/conda/vn/deepmodeling/pylammps-dp.svg)](https://anaconda.org/deepmodeling/pylammps-dp) | [![Conda Platforms](https://img.shields.io/conda/pn/deepmodeling/pylammps-dp.svg)](https://anaconda.org/deepmodeling/pylammps-dp) |
+| [![Conda Recipe](https://img.shields.io/badge/recipe-lammps--dp--and--library-green.svg)](https://anaconda.org/deepmodeling/lammps-dp-and-library) | [![Conda Downloads](https://img.shields.io/conda/dn/deepmodeling/lammps-dp-and-library.svg)](https://anaconda.org/deepmodeling/lammps-dp-and-library) | [![Conda Version](https://img.shields.io/conda/vn/deepmodeling/lammps-dp-and-library.svg)](https://anaconda.org/deepmodeling/lammps-dp-and-library) | [![Conda Platforms](https://img.shields.io/conda/pn/deepmodeling/lammps-dp-and-library.svg)](https://anaconda.org/deepmodeling/lammps-dp-and-library) |
 
 Installing lammps-dp-and-library
 ================================
@@ -121,16 +76,16 @@ conda config --add channels deepmodeling
 conda config --set channel_priority strict
 ```
 
-Once the `deepmodeling` channel has been enabled, `lammps-dp, liblammps-dp, liblammps-dp-base, pylammps-dp` can be installed with:
+Once the `deepmodeling` channel has been enabled, `lammps-dp-and-library` can be installed with:
 
 ```
-conda install lammps-dp liblammps-dp liblammps-dp-base pylammps-dp
+conda install lammps-dp-and-library
 ```
 
-It is possible to list all of the versions of `lammps-dp` available on your platform with:
+It is possible to list all of the versions of `lammps-dp-and-library` available on your platform with:
 
 ```
-conda search lammps-dp --channel deepmodeling
+conda search lammps-dp-and-library --channel deepmodeling
 ```
 
 
