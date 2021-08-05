@@ -1,4 +1,4 @@
-{% set name = "lammps-dp-and-library" %}
+{% set name = "lammps-dp" %}
 {% set version = "2.0.0.b4" %}
 {% set lammps = "stable_29Oct2020" %}
 
@@ -14,7 +14,7 @@ source:
     - c6fb9c3836c127fdac0b8284020dcc48f304cfdc.diff
     
 build:
-  number: 0
+  number: 1
   skip: True  # [not linux]
 
 requirements:
