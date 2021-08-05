@@ -25,7 +25,7 @@ requirements:
     - make
   
   host:
-    - python >=3
+    - python >=3  # [not ppc64le]
     - libdeepmd {{ version }}
     - plumed >=2.4,<2.8
     - mpich
