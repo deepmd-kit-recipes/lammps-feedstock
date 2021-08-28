@@ -1,6 +1,0 @@
-channel_targets:
-- deepmodeling dev
-channel_sources:
-  - deepmodeling/label/dev,deepmodeling,https://deepmodeling.njzjz.win,defaults  # [linux64]
-  - deepmodeling/label/dev,deepmodeling,https://deepmodeling.njzjz.win,defaults,conda-forge  # [ppc64le]
-
