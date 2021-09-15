@@ -15,7 +15,7 @@ source:
     - c6fb9c3836c127fdac0b8284020dcc48f304cfdc.diff
     
 build:
-  number: 1
+  number: 2
   skip: True  # [not linux]
 
 requirements:
