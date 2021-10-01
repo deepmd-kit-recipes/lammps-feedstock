@@ -1,6 +1,6 @@
 {% set name = "lammps-dp" %}
-{% set version = "2.0.1" %}
-{% set lammps = "stable_29Oct2020" %}
+{% set version = "2.0.2" %}
+{% set lammps = "stable_29Sep2021" %}
 
 package:
   name: {{ name|lower }}
@@ -10,12 +10,10 @@ source:
   url: https://github.com/lammps/lammps/archive/{{ lammps }}.tar.gz
   #sha256: 5380c1689a93d7922e3d65d9c186401d429878bb3cbe9a692580d3470d6a253f
   patches: 
-    - deepmd.patch
-    - 2466.patch
-    - c6fb9c3836c127fdac0b8284020dcc48f304cfdc.diff
-    
+    - 0001-load-deepmd-automatically.patch
+   
 build:
-  number: 2
+  number: 0
   skip: True  # [not linux]
 
 requirements:
@@ -29,7 +27,6 @@ requirements:
   
   host:
     - python >=3
-    - libdeepmd {{ version }}
     - plumed >=2.4,<2.8
     - mpich
     - zlib
