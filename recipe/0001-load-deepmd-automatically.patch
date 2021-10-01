@@ -1,0 +1,43 @@
+From a8a5e52cb15f80817e1e418fb125900d88553bba Mon Sep 17 00:00:00 2001
+From: Jinzhe Zeng <jinzhe.zeng@rutgers.edu>
+Date: Thu, 30 Sep 2021 23:49:12 -0400
+Subject: [PATCH] load deepmd automatically
+
+---
+ src/input.cpp | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/src/input.cpp b/src/input.cpp
+index f67438d635..585d2eeed7 100644
+--- a/src/input.cpp
++++ b/src/input.cpp
+@@ -184,6 +184,7 @@ of the file is reached.  The *infile* pointer will usually point to
+ void Input::file()
+ {
+   int m,n;
++  int deepmd;
+ 
+   while (1) {
+ 
+@@ -192,6 +193,10 @@ void Input::file()
+     // if line ends in continuation char '&', concatenate next line
+ 
+     if (me == 0) {
++      if (!deepmd) {
++          line = "plugin load libdeepmd_lmp.so";
++          deepmd = 1;
++      } else {
+ 
+       m = 0;
+       while (1) {
+@@ -234,6 +239,7 @@ void Input::file()
+           break;
+         }
+       }
++      }
+     }
+ 
+     // bcast the line
+-- 
+2.31.1
+
