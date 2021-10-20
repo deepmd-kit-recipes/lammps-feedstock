@@ -1,0 +1,2065 @@
+From 98cdfa101636bab2884510483270b0360f7bd78d Mon Sep 17 00:00:00 2001
+From: Axel Kohlmeyer <akohlmey@gmail.com>
+Date: Fri, 15 Oct 2021 09:29:47 -0400
+Subject: [PATCH 01/19] fix bug detected by coverity scan
+
+---
+ src/REAXFF/fix_acks2_reaxff.cpp | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/REAXFF/fix_acks2_reaxff.cpp b/src/REAXFF/fix_acks2_reaxff.cpp
+index 58656feb2ba..f19b31f9eda 100644
+--- a/src/REAXFF/fix_acks2_reaxff.cpp
++++ b/src/REAXFF/fix_acks2_reaxff.cpp
+@@ -640,9 +640,10 @@ void FixACKS2ReaxFF::sparse_matvec_acks2(sparse_matrix *H, sparse_matrix *X, dou
+ 
+   for (ii = nn; ii < NN; ++ii) {
+     i = ilist[ii];
+-    if (atom->mask[i] & groupbit)
++    if (atom->mask[i] & groupbit) {
+       b[i] = 0;
+       b[NN + i] = 0;
++    }
+   }
+   // last two rows
+   b[2*NN] = 0;
+
+From 5140d26748be4c4fdbdcd5b9be994be1f9c35253 Mon Sep 17 00:00:00 2001
+From: Axel Kohlmeyer <akohlmey@gmail.com>
+Date: Fri, 15 Oct 2021 16:59:53 -0400
+Subject: [PATCH 02/19] plug memory leaks
+
+---
+ src/compute_orientorder_atom.cpp | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/src/compute_orientorder_atom.cpp b/src/compute_orientorder_atom.cpp
+index d4291251b6d..fd020e1865a 100644
+--- a/src/compute_orientorder_atom.cpp
++++ b/src/compute_orientorder_atom.cpp
+@@ -181,6 +181,8 @@ void ComputeOrientOrderAtom::init()
+     error->all(FLERR,"Compute orientorder/atom cutoff is "
+                "longer than pairwise cutoff");
+ 
++  memory->destroy(qnm_r);
++  memory->destroy(qnm_i);
+   memory->create(qnm_r,nqlist,2*qmax+1,"orientorder/atom:qnm_r");
+   memory->create(qnm_i,nqlist,2*qmax+1,"orientorder/atom:qnm_i");
+ 
+@@ -652,6 +654,7 @@ void ComputeOrientOrderAtom::init_clebsch_gordan()
+         idxcg_count++;
+   }
+   idxcg_max = idxcg_count;
++  memory->destroy(cglist);
+   memory->create(cglist, idxcg_max, "computeorientorderatom:cglist");
+ 
+   idxcg_count = 0;
+
+From 47523da16b889e45ae8174b4d46f3fd613352eea Mon Sep 17 00:00:00 2001
+From: Axel Kohlmeyer <akohlmey@gmail.com>
+Date: Fri, 15 Oct 2021 20:03:39 -0400
+Subject: [PATCH 03/19] allow single precision FFT introspection
+
+---
+ src/info.cpp   | 11 +++++++++++
+ src/info.h     |  1 +
+ src/lammps.cpp |  1 +
+ 3 files changed, 13 insertions(+)
+
+diff --git a/src/info.cpp b/src/info.cpp
+index dc95f8a30f5..bbc94fbccb9 100644
+--- a/src/info.cpp
++++ b/src/info.cpp
+@@ -299,6 +299,7 @@ void Info::command(int narg, char **arg)
+     if (has_png_support()) fputs("-DLAMMPS_PNG\n",out);
+     if (has_jpeg_support()) fputs("-DLAMMPS_JPEG\n",out);
+     if (has_ffmpeg_support()) fputs("-DLAMMPS_FFMPEG\n",out);
++    if (has_fft_single_support()) fputs("-DFFT_SINGLE\n",out);
+     if (has_exceptions()) fputs("-DLAMMPS_EXCEPTIONS\n",out);
+ 
+ #if defined(LAMMPS_BIGBIG)
+@@ -879,6 +880,8 @@ bool Info::is_available(const char *category, const char *name)
+       return has_jpeg_support();
+     } else if (strcmp(name,"ffmpeg") == 0) {
+       return has_ffmpeg_support();
++    } else if (strcmp(name,"fft_single") == 0) {
++      return has_fft_single_support();
+     } else if (strcmp(name,"exceptions") == 0) {
+       return has_exceptions();
+     }
+@@ -1127,6 +1130,14 @@ bool Info::has_ffmpeg_support() {
+ #endif
+ }
+ 
++bool Info::has_fft_single_support() {
++#ifdef FFT_SINGLE
++  return true;
++#else
++  return false;
++#endif
++}
++
+ bool Info::has_exceptions() {
+ #ifdef LAMMPS_EXCEPTIONS
+   return true;
+diff --git a/src/info.h b/src/info.h
+index 0e7bfb68f33..c1e10a23367 100644
+--- a/src/info.h
++++ b/src/info.h
+@@ -42,6 +42,7 @@ class Info : public Command {
+   static bool has_png_support();
+   static bool has_jpeg_support();
+   static bool has_ffmpeg_support();
++  static bool has_fft_single_support();
+   static bool has_exceptions();
+   static bool has_package(const std::string &);
+   static bool has_accelerator_feature(const std::string &, const std::string &,
+diff --git a/src/lammps.cpp b/src/lammps.cpp
+index 7185074ab46..85410118149 100644
+--- a/src/lammps.cpp
++++ b/src/lammps.cpp
+@@ -1348,6 +1348,7 @@ void LAMMPS::print_config(FILE *fp)
+   if (Info::has_png_support()) fputs("-DLAMMPS_PNG\n",fp);
+   if (Info::has_jpeg_support()) fputs("-DLAMMPS_JPEG\n",fp);
+   if (Info::has_ffmpeg_support()) fputs("-DLAMMPS_FFMPEG\n",fp);
++  if (Info::has_fft_single_support()) fputs("-DFFT_SINGLE\n",fp);
+   if (Info::has_exceptions()) fputs("-DLAMMPS_EXCEPTIONS\n",fp);
+ #if defined(LAMMPS_BIGBIG)
+   fputs("-DLAMMPS_BIGBIG\n",fp);
+
+From 6827f71f26874e1a23879a57e9652da838ea6311 Mon Sep 17 00:00:00 2001
+From: Axel Kohlmeyer <akohlmey@gmail.com>
+Date: Fri, 15 Oct 2021 20:04:16 -0400
+Subject: [PATCH 04/19] pppm kspace styles also require -DFFT_SINGLE when using
+ GPUs in single precision
+
+---
+ unittest/force-styles/test_pair_style.cpp | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/unittest/force-styles/test_pair_style.cpp b/unittest/force-styles/test_pair_style.cpp
+index a2c84240244..898fb8e4121 100644
+--- a/unittest/force-styles/test_pair_style.cpp
++++ b/unittest/force-styles/test_pair_style.cpp
+@@ -858,6 +858,13 @@ TEST(PairStyle, gpu)
+     if (!Info::has_gpu_device()) GTEST_SKIP();
+     if (test_config.skip_tests.count(test_info_->name())) GTEST_SKIP();
+ 
++    // when testing PPPM styles with GPUs and GPU support is compiled with single precision
++    // we also must have single precision FFTs; otherwise skip since the test would abort
++    if (utils::strmatch(test_config.basename, ".*pppm.*") &&
++        (Info::has_accelerator_feature("GPU", "precision", "single")) &&
++        (!Info::has_fft_single_support()))
++        GTEST_SKIP();
++
+     const char *args_neigh[]   = {"PairStyle", "-log",    "none", "-echo",
+                                 "screen",    "-nocite", "-sf",  "gpu"};
+     const char *args_noneigh[] = {"PairStyle", "-log", "none", "-echo", "screen", "-nocite", "-sf",
+
+From 83e58eadb7b31974cf347e622615dc428da080ea Mon Sep 17 00:00:00 2001
+From: Axel Kohlmeyer <akohlmey@gmail.com>
+Date: Fri, 15 Oct 2021 20:23:31 -0400
+Subject: [PATCH 05/19] correct expansion of fix/compute/variable arguments to
+ avoid bogus thermo outpu
+
+---
+ src/utils.cpp | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/src/utils.cpp b/src/utils.cpp
+index 25be3f3b02a..507500f116a 100644
+--- a/src/utils.cpp
++++ b/src/utils.cpp
+@@ -661,7 +661,10 @@ int utils::expand_args(const char *file, int line, int narg, char **arg, int mod
+       }
+ 
+       for (int index = nlo; index <= nhi; index++) {
+-        earg[newarg] = utils::strdup(fmt::format("{}2_{}[{}]{}", word[0], id, index, tail));
++        if (word[1] == '2')
++          earg[newarg] = utils::strdup(fmt::format("{}2_{}[{}]{}", word[0], id, index, tail));
++        else
++          earg[newarg] = utils::strdup(fmt::format("{}_{}[{}]{}", word[0], id, index, tail));
+         newarg++;
+       }
+     } else {
+
+From ab30ed4ca9f2a1a00188adcd14a17cd47f8bea6a Mon Sep 17 00:00:00 2001
+From: Axel Kohlmeyer <akohlmey@gmail.com>
+Date: Sat, 16 Oct 2021 05:35:24 -0400
+Subject: [PATCH 06/19] modernize
+
+---
+ src/GRANULAR/fix_pour.cpp | 13 +++----------
+ 1 file changed, 3 insertions(+), 10 deletions(-)
+
+diff --git a/src/GRANULAR/fix_pour.cpp b/src/GRANULAR/fix_pour.cpp
+index a2f4d918400..b73593b1d75 100644
+--- a/src/GRANULAR/fix_pour.cpp
++++ b/src/GRANULAR/fix_pour.cpp
+@@ -268,16 +268,9 @@ FixPour::FixPour(LAMMPS *lmp, int narg, char **arg) :
+ 
+   // print stats
+ 
+-  if (me == 0) {
+-    if (screen)
+-      fprintf(screen,
+-              "Particle insertion: %d every %d steps, %d by step %d\n",
+-              nper,nfreq,ninsert,nfinal);
+-    if (logfile)
+-      fprintf(logfile,
+-              "Particle insertion: %d every %d steps, %d by step %d\n",
+-              nper,nfreq,ninsert,nfinal);
+-  }
++  if (me == 0)
++    utils::logmesg(lmp, "Particle insertion: {} every {} steps, {} by step {}\n",
++                   nper,nfreq,ninsert,nfinal);
+ }
+ 
+ /* ---------------------------------------------------------------------- */
+
+From 59d79ce1762e6c9248af308e9dacba67eff6b6be Mon Sep 17 00:00:00 2001
+From: Axel Kohlmeyer <akohlmey@gmail.com>
+Date: Sat, 16 Oct 2021 07:16:40 -0400
+Subject: [PATCH 07/19] update googletest to version 1.11
+
+---
+ cmake/Modules/GTest.cmake | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/cmake/Modules/GTest.cmake b/cmake/Modules/GTest.cmake
+index 211b506d2f2..e012e61ea99 100644
+--- a/cmake/Modules/GTest.cmake
++++ b/cmake/Modules/GTest.cmake
+@@ -7,8 +7,8 @@ else()
+ endif()
+ 
+ include(ExternalProject)
+-set(GTEST_URL "https://github.com/google/googletest/archive/release-1.10.0.tar.gz" CACHE STRING "URL for GTest tarball")
+-set(GTEST_MD5 "ecd1fa65e7de707cd5c00bdac56022cd" CACHE STRING "MD5 checksum of GTest tarball")
++set(GTEST_URL "https://github.com/google/googletest/archive/release-1.11.0.tar.gz" CACHE STRING "URL of googletest source")
++set(GTEST_MD5 "e8a8df240b6938bb6384155d4c37d937" CACHE STRING "MD5 sum for googletest source")
+ mark_as_advanced(GTEST_URL)
+ mark_as_advanced(GTEST_MD5)
+ ExternalProject_Add(googletest
+
+From 8cf030e476d06eadc9cb4994d9dc0d1079d8eeef Mon Sep 17 00:00:00 2001
+From: Axel Kohlmeyer <akohlmey@gmail.com>
+Date: Sat, 16 Oct 2021 07:28:16 -0400
+Subject: [PATCH 08/19] small tweak for mixed precision GPU runs
+
+---
+ unittest/force-styles/tests/mol-pair-coul_long.yaml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/unittest/force-styles/tests/mol-pair-coul_long.yaml b/unittest/force-styles/tests/mol-pair-coul_long.yaml
+index 61e038af549..5746877cc35 100644
+--- a/unittest/force-styles/tests/mol-pair-coul_long.yaml
++++ b/unittest/force-styles/tests/mol-pair-coul_long.yaml
+@@ -1,7 +1,7 @@
+ ---
+ lammps_version: 10 Feb 2021
+ date_generated: Fri Feb 26 23:08:42 2021
+-epsilon: 1.5e-13
++epsilon: 2.0e-13
+ prerequisites: ! |
+   atom full
+   pair coul/long
+
+From e990a1cf616b2e9d740f9ab271737e75dbf8ce65 Mon Sep 17 00:00:00 2001
+From: Axel Kohlmeyer <akohlmey@gmail.com>
+Date: Sat, 16 Oct 2021 21:07:04 -0400
+Subject: [PATCH 09/19] remove ambiguity between "double_precision" class
+ member variable and function
+
+---
+ lib/gpu/geryon/ocl_device.h | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/lib/gpu/geryon/ocl_device.h b/lib/gpu/geryon/ocl_device.h
+index df53aff5b85..2cb06999d91 100644
+--- a/lib/gpu/geryon/ocl_device.h
++++ b/lib/gpu/geryon/ocl_device.h
+@@ -88,7 +88,7 @@ struct OCLProperties {
+   cl_uint clock;
+   size_t work_group_size;
+   size_t work_item_size[3];
+-  bool double_precision;
++  bool has_double_precision;
+   int preferred_vector_width32, preferred_vector_width64;
+   int alignment;
+   size_t timer_resolution;
+@@ -226,7 +226,7 @@ class UCL_Device {
+   inline bool double_precision() { return double_precision(_device); }
+   /// Returns true if double precision is support for the device
+   inline bool double_precision(const int i)
+-    {return _properties[i].double_precision;}
++    {return _properties[i].has_double_precision;}
+ 
+   /// Get the number of compute units on the current device
+   inline unsigned cus() { return cus(_device); }
+@@ -569,9 +569,9 @@ void UCL_Device::add_properties(cl_device_id device_list) {
+   CL_SAFE_CALL(clGetDeviceInfo(device_list,CL_DEVICE_DOUBLE_FP_CONFIG,
+                                sizeof(double_avail),&double_avail,nullptr));
+   if ((double_avail & double_mask) == double_mask)
+-    op.double_precision=true;
++    op.has_double_precision=true;
+   else
+-    op.double_precision=false;
++    op.has_double_precision=false;
+ 
+   CL_SAFE_CALL(clGetDeviceInfo(device_list,
+                                CL_DEVICE_PROFILING_TIMER_RESOLUTION,
+
+From cfdf9cee5dd45f6385072131a7793cd55e3b27b4 Mon Sep 17 00:00:00 2001
+From: Axel Kohlmeyer <akohlmey@gmail.com>
+Date: Sat, 16 Oct 2021 21:28:18 -0400
+Subject: [PATCH 10/19] modernize
+
+---
+ src/DPD-REACT/fix_rx.cpp | 153 ++++++++++++++-------------------------
+ 1 file changed, 54 insertions(+), 99 deletions(-)
+
+diff --git a/src/DPD-REACT/fix_rx.cpp b/src/DPD-REACT/fix_rx.cpp
+index b14831ee8d2..f21914e2d58 100644
+--- a/src/DPD-REACT/fix_rx.cpp
++++ b/src/DPD-REACT/fix_rx.cpp
+@@ -84,7 +84,7 @@ FixRX::FixRX(LAMMPS *lmp, int narg, char **arg) :
+   id_fix_species = nullptr;
+   id_fix_species_old = nullptr;
+ 
+-  const int Verbosity = 1;
++  constexpr int Verbosity = 1;
+ 
+   // Keep track of the argument list.
+   int iarg = 3;
+@@ -101,13 +101,10 @@ FixRX::FixRX(LAMMPS *lmp, int narg, char **arg) :
+     if (strcmp(word,"none") == 0) {
+       wtFlag = 0;
+       localTempFlag = NONE;
+-    }
+-    else if (strcmp(word,"lucy") == 0) {
++    } else if (strcmp(word,"lucy") == 0) {
+       wtFlag = LUCY;
+       localTempFlag = HARMONIC;
+-    }
+-    else
+-      error->all(FLERR,"Illegal fix rx local temperature weighting technique");
++    } else error->all(FLERR,"Illegal fix rx local temperature weighting technique");
+   }
+ 
+   // Select either sparse and dense matrix
+@@ -120,21 +117,11 @@ FixRX::FixRX(LAMMPS *lmp, int narg, char **arg) :
+       useSparseKinetics = true;
+     else if (strcmp(word,"dense") == 0)
+       useSparseKinetics = false;
+-    else {
+-      std::string errmsg = "Illegal command " + std::string(word)
+-                             + " expected \"sparse\" or \"dense\"\n";
+-      error->all(FLERR, errmsg);
+-    }
+-
+-    if (comm->me == 0 && Verbosity > 1) {
+-      std::string msg = "FixRX: matrix format is ";
+-      if (useSparseKinetics)
+-         msg += std::string("sparse");
+-      else
+-         msg += std::string("dense");
++    else error->all(FLERR, "Illegal command " + std::string(word)
++                    + " expected \"sparse\" or \"dense\"\n");
+ 
+-      error->message(FLERR, msg);
+-    }
++    if (comm->me == 0 && Verbosity > 1)
++      error->message(FLERR, fmt::format("FixRX: matrix format is {}",word));
+   }
+ 
+   // Determine the ODE solver/stepper strategy in arg[6].
+@@ -169,40 +156,32 @@ FixRX::FixRX(LAMMPS *lmp, int narg, char **arg) :
+   }
+ 
+   if (odeIntegrationFlag == ODE_LAMMPS_RK4 && narg==8) {
+-    char *word = arg[iarg++];
+-    minSteps = atoi( word );
++    minSteps = utils::inumeric(FLERR,arg[iarg++],false,lmp);
+ 
+-    if (comm->me == 0 && Verbosity > 1) {
+-      char msg[128];
+-      sprintf(msg, "FixRX: RK4 numSteps= %d", minSteps);
+-      error->message(FLERR, msg);
+-    }
+-  }
+-  else if (odeIntegrationFlag == ODE_LAMMPS_RK4 && narg>8) {
++    if (comm->me == 0 && Verbosity > 1)
++      error->message(FLERR,fmt::format("FixRX: RK4 numSteps= {}", minSteps));
++  } else if (odeIntegrationFlag == ODE_LAMMPS_RK4 && narg>8) {
+     error->all(FLERR,"Illegal fix rx command.  Too many arguments for RK4 solver.");
+-  }
+-  else if (odeIntegrationFlag == ODE_LAMMPS_RKF45) {
++  } else if (odeIntegrationFlag == ODE_LAMMPS_RKF45) {
+     // Must have four options.
+     if (narg < 11)
+       error->all(FLERR,"Illegal fix rx command.  Too few arguments for RKF45 solver.");
+ 
+-    minSteps = atoi( arg[iarg++] );
+-    maxIters = atoi( arg[iarg++] );
+-    relTol   = strtod( arg[iarg++], nullptr);
+-    absTol   = strtod( arg[iarg++], nullptr);
++    minSteps = utils::inumeric(FLERR,arg[iarg++],false,lmp);
++    maxIters = utils::inumeric(FLERR,arg[iarg++],false,lmp);
++    relTol   = utils::numeric(FLERR,arg[iarg++],false,lmp);
++    absTol   = utils::numeric(FLERR,arg[iarg++],false,lmp);
+ 
+     if (iarg < narg)
+-      diagnosticFrequency = atoi( arg[iarg++] );
++      diagnosticFrequency = utils::inumeric(FLERR,arg[iarg++],false,lmp);
+ 
+     // maxIters must be at least minSteps.
+     maxIters = std::max( minSteps, maxIters );
+ 
+-    if (comm->me == 0 && Verbosity > 1) {
+-      //printf("FixRX: RKF45 minSteps= %d maxIters= %d absTol= %e relTol= %e\n", minSteps, maxIters, absTol, relTol);
+-      char msg[128];
+-      sprintf(msg, "FixRX: RKF45 minSteps= %d maxIters= %d relTol= %.1e absTol= %.1e diagnosticFrequency= %d", minSteps, maxIters, relTol, absTol, diagnosticFrequency);
+-      error->message(FLERR, msg);
+-    }
++    if (comm->me == 0 && Verbosity > 1)
++      error->message(FLERR, fmt::format("FixRX: RKF45 minSteps= {} maxIters= {} "
++                                        "relTol= {:.1e} absTol= {:.1e} diagnosticFrequency= {}",
++                                        minSteps, maxIters, relTol, absTol, diagnosticFrequency));
+   }
+ 
+   // Initialize/Create the sparse matrix database.
+@@ -265,11 +244,8 @@ void FixRX::post_constructor()
+   fp = nullptr;
+   if (comm->me == 0) {
+     fp = utils::open_potential(kineticsFile,lmp,nullptr);
+-    if (fp == nullptr) {
+-      char str[128];
+-      snprintf(str,128,"Cannot open rx file %s",kineticsFile);
+-      error->one(FLERR,str);
+-    }
++    if (fp == nullptr)
++      error->one(FLERR,"Cannot open rx file {}: {}",kineticsFile,utils::getsyserror());
+   }
+ 
+   // Assign species names to tmpspecies array and determine the number of unique species
+@@ -358,7 +334,7 @@ void FixRX::post_constructor()
+   read_file( kineticsFile );
+ 
+   if (useSparseKinetics)
+-    this->initSparse();
++    initSparse();
+ 
+   // set comm size needed by this Pair
+   comm_forward = nspecies*2;
+@@ -369,7 +345,7 @@ void FixRX::post_constructor()
+ 
+ void FixRX::initSparse()
+ {
+-  const int Verbosity = 1;
++  constexpr int Verbosity = 1;
+ 
+   if (comm->me == 0 && Verbosity > 1) {
+     for (int k = 0; k < nspecies; ++k)
+@@ -449,7 +425,8 @@ void FixRX::initSparse()
+       }
+     }
+     if (comm->me == 0 && Verbosity > 1)
+-      printf("rx%3d: %d %d %d ... %s %s %s\n", i, nreac_i, nprod_i, allAreIntegral, rstr.c_str(), /*reversible[i]*/ (false) ? "<=>" : "=", pstr.c_str());
++      utils::logmesg(lmp,"rx{:3d}: {} {} {} ... {} = {}\n",
++                     i, nreac_i, nprod_i, allAreIntegral, rstr, pstr);
+ 
+     mxreac = std::max( mxreac, nreac_i );
+     mxprod = std::max( mxprod, nprod_i );
+@@ -458,8 +435,12 @@ void FixRX::initSparse()
+   }
+ 
+   if (comm->me == 0 && Verbosity > 1) {
+-    char msg[256];
+-    sprintf(msg, "FixRX: Sparsity of Stoichiometric Matrix= %.1f%% non-zeros= %d nspecies= %d nreactions= %d maxReactants= %d maxProducts= %d maxSpecies= %d integralReactions= %d", 100*(double(nzeros) / (nspecies * nreactions)), nzeros, nspecies, nreactions, mxreac, mxprod, (mxreac + mxprod), SparseKinetics_enableIntegralReactions);
++    auto msg = fmt::format("FixRX: Sparsity of Stoichiometric Matrix= {:.1f}% non-zeros= {} "
++                           "nspecies= {} nreactions= {} maxReactants= {} maxProducts= {} "
++                           "maxSpecies= {} integralReactions= {}",
++                           100*(double(nzeros) / (nspecies * nreactions)), nzeros, nspecies,
++                           nreactions, mxreac, mxprod, (mxreac + mxprod),
++                           SparseKinetics_enableIntegralReactions);
+     error->message(FLERR, msg);
+   }
+ 
+@@ -774,18 +755,9 @@ void FixRX::pre_force(int /*vflag*/)
+ 
+   double time_ODE = getElapsedTime(timer_localTemperature, timer_ODE);
+ 
+-  //printf("me= %d total= %g temp= %g ode= %g comm= %g nlocal= %d nfc= %d %d\n", comm->me,
+-  //                       getElapsedTime(timer_start, timer_stop),
+-  //                       getElapsedTime(timer_start, timer_localTemperature),
+-  //                       getElapsedTime(timer_localTemperature, timer_ODE),
+-  //                       getElapsedTime(timer_ODE, timer_stop), nlocal, nFuncs, nSteps);
+-
+   // Warn the user if a failure was detected in the ODE solver.
+-  if (nFails > 0) {
+-    char sbuf[128];
+-    sprintf(sbuf,"in FixRX::pre_force, ODE solver failed for %d atoms.", nFails);
+-    error->warning(FLERR, sbuf);
+-  }
++  if (nFails > 0)
++    error->warning(FLERR, fmt::format("FixRX::pre_force ODE solver failed for {} atoms.", nFails));
+ 
+   // Compute and report ODE diagnostics, if requested.
+   if (odeIntegrationFlag == ODE_LAMMPS_RKF45 && diagnosticFrequency != 0) {
+@@ -1422,17 +1394,9 @@ void FixRX::odeDiagnostics()
+   double time_local = getElapsedTime( timer_start, timer_stop );
+ 
+   if (comm->me == 0) {
+-    char smesg[128];
+-
+-#define print_mesg(smesg) {\
+-    if (screen)  fprintf(screen,"%s\n", smesg); \
+-    if (logfile) fprintf(logfile,"%s\n", smesg); }
+-
+-    sprintf(smesg, "FixRX::ODE Diagnostics:  # of iters  |# of rhs evals| run-time (sec) | # atoms");
+-    print_mesg(smesg);
+-
+-    sprintf(smesg, "         AVG per ODE  : %-12.5g | %-12.5g | %-12.5g", avg_per_atom[0], avg_per_atom[1], avg_per_atom[2]);
+-    print_mesg(smesg);
++    utils::logmesg(lmp,"FixRX::ODE Diagnostics:  # of iters  |# of rhs evals| run-time (sec) | # atoms\n");
++    utils::logmesg(lmp,"         AVG per ODE  : {:>12.5g} | {:>12.5g} | {:>12.5g}\n",
++                   avg_per_atom[0], avg_per_atom[1], avg_per_atom[2]);
+ 
+     // only valid for single time-step!
+     if (diagnosticFrequency == 1) {
+@@ -1440,41 +1404,32 @@ void FixRX::odeDiagnostics()
+       for (int i = 0; i < numCounters; ++i)
+         rms_per_ODE[i] = sqrt( sum_sq[i+numCounters] / nODEs );
+ 
+-      sprintf(smesg, "         RMS per ODE  : %-12.5g | %-12.5g ", rms_per_ODE[0], rms_per_ODE[1]);
+-      print_mesg(smesg);
+-
+-      sprintf(smesg, "         MAX per ODE  : %-12.5g | %-12.5g ", max_per_ODE[0], max_per_ODE[1]);
+-      print_mesg(smesg);
+-
+-      sprintf(smesg, "         MIN per ODE  : %-12.5g | %-12.5g ", min_per_ODE[0], min_per_ODE[1]);
+-      print_mesg(smesg);
++      utils::logmesg(lmp, "         RMS per ODE  : {:>12.5g} | {:>12.5g}\n",
++                     rms_per_ODE[0], rms_per_ODE[1]);
++      utils::logmesg(lmp, "         MAX per ODE  : {:>12.5g} | {:>12.5g}\n",
++                     max_per_ODE[0], max_per_ODE[1]);
++      utils::logmesg(lmp, "         MIN per ODE  : {:>12.5g} | {:>12.5g}\n",
++                     min_per_ODE[0], min_per_ODE[1]);
+     }
+ 
+-    sprintf(smesg, "         AVG per Proc : %-12.5g | %-12.5g | %-12.5g | %-12.5g", avg_per_proc[StepSum], avg_per_proc[FuncSum], avg_per_proc[TimeSum], avg_per_proc[AtomSum]);
+-    print_mesg(smesg);
++    utils::logmesg(lmp,"         AVG per Proc : {:>12.5g} | {:>12.5g} | {:>12.5g} | {:>12.5g}\n",
++                   avg_per_proc[StepSum], avg_per_proc[FuncSum], avg_per_proc[TimeSum], avg_per_proc[AtomSum]);
+ 
+     if (comm->nprocs > 1) {
+       double rms_per_proc[numCounters];
+       for (int i = 0; i < numCounters; ++i)
+         rms_per_proc[i] = sqrt( sum_sq[i] / comm->nprocs );
+ 
+-      sprintf(smesg, "         RMS per Proc : %-12.5g | %-12.5g | %-12.5g | %-12.5g", rms_per_proc[0], rms_per_proc[1], rms_per_proc[2], rms_per_proc[AtomSum]);
+-      print_mesg(smesg);
+-
+-      sprintf(smesg, "         MAX per Proc : %-12.5g | %-12.5g | %-12.5g | %-12.5g", max_per_proc[0], max_per_proc[1], max_per_proc[2], max_per_proc[AtomSum]);
+-      print_mesg(smesg);
+-
+-      sprintf(smesg, "         MIN per Proc : %-12.5g | %-12.5g | %-12.5g | %-12.5g", min_per_proc[0], min_per_proc[1], min_per_proc[2], min_per_proc[AtomSum]);
+-      print_mesg(smesg);
++      utils::logmesg(lmp,"         RMS per Proc : {:>12.5g} | {:>12.5g} | {:>12.5g} | {:>12.5g}\n",
++                     rms_per_proc[0], rms_per_proc[1], rms_per_proc[2], rms_per_proc[AtomSum]);
++      utils::logmesg(lmp,"         MAX per Proc : {:>12.5g} | {:>12.5g} | {:>12.5g} | {:>12.5g}\n",
++                     max_per_proc[0], max_per_proc[1], max_per_proc[2], max_per_proc[AtomSum]);
++      utils::logmesg(lmp,"         MIN per Proc : {:>12.5g} | {:>12.5g} | {:>12.5g} | {:>12.5g}\n",
++                     min_per_proc[0], min_per_proc[1], min_per_proc[2], min_per_proc[AtomSum]);
+     }
+ 
+-    sprintf(smesg, "  AVG'd over %d time-steps", nTimes);
+-    print_mesg(smesg);
+-    sprintf(smesg, "  AVG'ing took %g sec", time_local);
+-    print_mesg(smesg);
+-
+-#undef print_mesg
+-
++    utils::logmesg(lmp, "  AVG'd over {} time-steps\n", nTimes);
++    utils::logmesg(lmp, "  AVG'ing took {} sec", time_local);
+   }
+ 
+   // Reset the counters.
+
+From f392b089a4241751618f5287a6bd43f4ae0fb99c Mon Sep 17 00:00:00 2001
+From: Axel Kohlmeyer <akohlmey@gmail.com>
+Date: Sat, 16 Oct 2021 21:40:17 -0400
+Subject: [PATCH 11/19] modernize
+
+---
+ src/DPD-REACT/fix_shardlow.cpp |  9 +++------
+ src/REPLICA/fix_pimd.cpp       | 15 +++++----------
+ src/REPLICA/tad.cpp            |  8 +++-----
+ 3 files changed, 11 insertions(+), 21 deletions(-)
+
+diff --git a/src/DPD-REACT/fix_shardlow.cpp b/src/DPD-REACT/fix_shardlow.cpp
+index 65fa14daeb3..955f1ddd0a3 100644
+--- a/src/DPD-REACT/fix_shardlow.cpp
++++ b/src/DPD-REACT/fix_shardlow.cpp
+@@ -549,12 +549,9 @@ void FixShardlow::initial_integrate(int /*vflag*/)
+     error->all(FLERR,"Fix shardlow does not yet support triclinic geometries");
+ 
+   if (rcut >= bbx || rcut >= bby || rcut>= bbz )
+-  {
+-    char fmt[] = {"Shardlow algorithm requires sub-domain length > 2*(rcut+skin). Either reduce the number of processors requested, or change the cutoff/skin: rcut= %e bbx= %e bby= %e bbz= %e\n"};
+-    char *msg = (char *) malloc(sizeof(fmt) + 4*15);
+-    sprintf(msg, fmt, rcut, bbx, bby, bbz);
+-    error->one(FLERR, msg);
+-  }
++    error->one(FLERR,"Shardlow algorithm requires sub-domain length > 2*(rcut+skin). "
++                    "Either reduce the number of processors requested, or change the cutoff/skin: "
++                    "rcut= {} bbx= {} bby= {} bbz= {}\n", rcut, bbx, bby, bbz);
+ 
+   NPairHalfBinNewtonSSA *np_ssa = dynamic_cast<NPairHalfBinNewtonSSA*>(list->np);
+   if (!np_ssa) error->one(FLERR, "NPair wasn't a NPairHalfBinNewtonSSA object");
+diff --git a/src/REPLICA/fix_pimd.cpp b/src/REPLICA/fix_pimd.cpp
+index bb4af16f1b7..d4b3447f151 100644
+--- a/src/REPLICA/fix_pimd.cpp
++++ b/src/REPLICA/fix_pimd.cpp
+@@ -676,16 +676,11 @@ void FixPIMD::comm_exec(double **ptr)
+       int index = atom->map(tag_send[i]);
+ 
+       if (index < 0) {
+-        char error_line[256];
+-
+-        sprintf(error_line,
+-                "Atom " TAGINT_FORMAT " is missing at world [%d] "
+-                "rank [%d] required by  rank [%d] (" TAGINT_FORMAT ", " TAGINT_FORMAT
+-                ", " TAGINT_FORMAT ").\n",
+-                tag_send[i], universe->iworld, comm->me, plan_recv[iplan], atom->tag[0],
+-                atom->tag[1], atom->tag[2]);
+-
+-        error->universe_one(FLERR, error_line);
++        auto mesg = fmt::format("Atom {} is missing at world [{}] rank [{}] "
++                                "required by rank [{}] ({}, {}, {}).\n",
++                                tag_send[i], universe->iworld, comm->me,
++                                plan_recv[iplan], atom->tag[0], atom->tag[1], atom->tag[2]);
++        error->universe_one(FLERR, mesg);
+       }
+ 
+       memcpy(wrap_ptr, ptr[index], ncpy);
+diff --git a/src/REPLICA/tad.cpp b/src/REPLICA/tad.cpp
+index 881ec1604c8..0b1cc915c61 100644
+--- a/src/REPLICA/tad.cpp
++++ b/src/REPLICA/tad.cpp
+@@ -840,11 +840,9 @@ void TAD::initialize_event_list() {
+ 
+ void TAD::delete_event_list() {
+ 
+-  for (int i = 0; i < n_event_list; i++) {
+-    char str[128];
+-    sprintf(str,"tad_event_%d",i);
+-    modify->delete_fix(str);
+-  }
++  for (int i = 0; i < n_event_list; i++)
++    modify->delete_fix(fmt::format("tad_event_{}",i));
++
+   memory->sfree(fix_event_list);
+   fix_event_list = nullptr;
+   n_event_list = 0;
+
+From 6145ef9cd241ac49c31f71563f3b1b93e5bbec3a Mon Sep 17 00:00:00 2001
+From: Axel Kohlmeyer <akohlmey@gmail.com>
+Date: Sun, 17 Oct 2021 09:43:25 -0400
+Subject: [PATCH 12/19] fix bugs related to custom per-atom properties in dump
+ style custom
+
+---
+ src/dump_custom.cpp | 78 +++++++++++++++++----------------------------
+ 1 file changed, 30 insertions(+), 48 deletions(-)
+
+diff --git a/src/dump_custom.cpp b/src/dump_custom.cpp
+index b2acdbfc51c..0e47671bb94 100644
+--- a/src/dump_custom.cpp
++++ b/src/dump_custom.cpp
+@@ -131,7 +131,7 @@ DumpCustom::DumpCustom(LAMMPS *lmp, int narg, char **arg) :
+ 
+   if (ioptional < nfield &&
+       strcmp(style,"image") != 0 && strcmp(style,"movie") != 0)
+-    error->all(FLERR,"Invalid attribute in dump custom command");
++    error->all(FLERR,"Invalid attribute {} in dump {} command",earg[ioptional],style);
+ 
+   // noptional = # of optional args
+   // reset nfield to subtract off optional args
+@@ -238,9 +238,8 @@ DumpCustom::~DumpCustom()
+ 
+   for (int i = 0; i < ncustom; i++) delete[] id_custom[i];
+   memory->sfree(id_custom);
+-  delete [] custom;
+-  delete [] custom_flag;
+-
++  memory->sfree(custom);
++  memory->sfree(custom_flag);
+   memory->destroy(choose);
+   memory->destroy(dchoose);
+   memory->destroy(clist);
+@@ -909,32 +908,27 @@ int DumpCustom::count()
+ 
+       } else if (thresh_array[ithresh] == Q) {
+         if (!atom->q_flag)
+-          error->all(FLERR,
+-                     "Threshold for an atom property that isn't allocated");
++          error->all(FLERR,"Threshold for an atom property that isn't allocated");
+         ptr = atom->q;
+         nstride = 1;
+       } else if (thresh_array[ithresh] == MUX) {
+         if (!atom->mu_flag)
+-          error->all(FLERR,
+-                     "Threshold for an atom property that isn't allocated");
++          error->all(FLERR,"Threshold for an atom property that isn't allocated");
+         ptr = &atom->mu[0][0];
+         nstride = 4;
+       } else if (thresh_array[ithresh] == MUY) {
+         if (!atom->mu_flag)
+-          error->all(FLERR,
+-                     "Threshold for an atom property that isn't allocated");
++          error->all(FLERR,"Threshold for an atom property that isn't allocated");
+         ptr = &atom->mu[0][1];
+         nstride = 4;
+       } else if (thresh_array[ithresh] == MUZ) {
+         if (!atom->mu_flag)
+-          error->all(FLERR,
+-                     "Threshold for an atom property that isn't allocated");
++          error->all(FLERR,"Threshold for an atom property that isn't allocated");
+         ptr = &atom->mu[0][2];
+         nstride = 4;
+       } else if (thresh_array[ithresh] == MU) {
+         if (!atom->mu_flag)
+-          error->all(FLERR,
+-                     "Threshold for an atom property that isn't allocated");
++          error->all(FLERR,"Threshold for an atom property that isn't allocated");
+         ptr = &atom->mu[0][3];
+         nstride = 4;
+ 
+@@ -1521,7 +1515,7 @@ int DumpCustom::parse_fields(int narg, char **arg)
+         field2index[iarg] = add_variable(name);
+         break;
+ 
+-      // custom per-atom floating point vector or array
++      // custom per-atom floating point vector or array = d_ID d2_ID
+ 
+       case ArgInfo::DNAME:
+         pack_choice[iarg] = &DumpCustom::pack_custom;
+@@ -1533,18 +1527,18 @@ int DumpCustom::parse_fields(int narg, char **arg)
+           error->all(FLERR,"Could not find custom per-atom property ID: {}", name);
+         if (argindex[iarg] == 0) {
+           if (!flag || cols)
+-            error->all(FLERR,"Property double vector for dump custom does not exist");
++            error->all(FLERR,"Property double vector {} for dump custom does not exist",name);
+         } else {
+           if (!flag || !cols)
+-            error->all(FLERR,"Property double array for dump custom does not exist");
++            error->all(FLERR,"Property double array {} for dump custom does not exist",name);
+           if (argindex[iarg] > atom->dcols[n])
+-            error->all(FLERR,"Dump custom property array is accessed out-of-range");
++            error->all(FLERR,"Dump custom property array {} is accessed out-of-range",name);
+         }
+ 
+         field2index[iarg] = add_custom(name,1);
+         break;
+ 
+-      // custom per-atom integer vector or array
++      // custom per-atom integer vector or array = i_ID or i2_ID
+ 
+       case ArgInfo::INAME:
+         pack_choice[iarg] = &DumpCustom::pack_custom;
+@@ -1556,15 +1550,12 @@ int DumpCustom::parse_fields(int narg, char **arg)
+           error->all(FLERR,"Could not find custom per-atom property ID: {}", name);
+         if (argindex[iarg] == 0) {
+           if (flag || cols)
+-            error->all(FLERR,
+-                       "Property integer vector for dump custom does not exist");
++            error->all(FLERR,"Property integer vector {} for dump custom does not exist",name);
+         } else {
+           if (flag || !cols)
+-            error->all(FLERR,
+-                       "Property integer array for dump custom does not exist");
++            error->all(FLERR,"Property integer array {} for dump custom does not exist",name);
+           if (argindex[iarg] > atom->icols[n])
+-            error->all(FLERR,
+-                       "Dump custom property array is accessed out-of-range");
++            error->all(FLERR,"Dump custom property array {} is accessed out-of-range",name);
+         }
+ 
+         field2index[iarg] = add_custom(name,0);
+@@ -1574,6 +1565,7 @@ int DumpCustom::parse_fields(int narg, char **arg)
+ 
+       default:
+         return iarg;
++        break;
+       }
+     }
+   }
+@@ -1667,13 +1659,9 @@ int DumpCustom::add_custom(const char *id, int flag)
+     if (strcmp(id,id_custom[icustom]) == 0) break;
+   if (icustom < ncustom) return icustom;
+ 
+-  id_custom = (char **)
+-    memory->srealloc(id_custom,(ncustom+1)*sizeof(char *),"dump:id_custom");
+-
+-  delete [] custom;
+-  custom = new int[ncustom+1];
+-  delete [] custom_flag;
+-  custom_flag = new int[ncustom+1];
++  id_custom = (char **) memory->srealloc(id_custom,(ncustom+1)*sizeof(char *),"dump:id_custom");
++  custom = (int *) memory->srealloc(custom,(ncustom+1)*sizeof(int),"dump:custom");
++  custom_flag = (int *) memory->srealloc(custom_flag,(ncustom+1)*sizeof(int),"dump:custom_flag");
+ 
+   id_custom[ncustom] = utils::strdup(id);
+   custom_flag[ncustom] = flag;
+@@ -1962,21 +1950,18 @@ int DumpCustom::modify_param(int narg, char **arg)
+         if (n < 0)
+           error->all(FLERR,"Could not find custom per-atom property ID: {}", name);
+         if (argindex[nfield+nthresh] == 0) {
+-          if (flag || cols)
+-            error->all(FLERR,
+-                       "Property double vector for dump custom does not exist");
++          if (!flag || cols)
++            error->all(FLERR,"Property double vector for dump custom does not exist");
+           thresh_array[nthresh] = DVEC;
+         } else {
+-          if (flag || !cols)
+-            error->all(FLERR,
+-                       "Property double array for dump custom does not exist");
++          if (!flag || !cols)
++            error->all(FLERR,"Property double array for dump custom does not exist");
+           if (argindex[nfield+nthresh] > atom->dcols[n])
+-            error->all(FLERR,
+-                       "Dump custom property array is accessed out-of-range");
++            error->all(FLERR,"Dump custom property array is accessed out-of-range");
+           thresh_array[nthresh] = DARRAY;
+         }
+ 
+-        field2index[nfield+nthresh] = add_custom(name,0);
++        field2index[nfield+nthresh] = add_custom(name,thresh_array[nthresh]);
+         break;
+ 
+       // custom per atom integer vector or array
+@@ -1988,20 +1973,17 @@ int DumpCustom::modify_param(int narg, char **arg)
+           error->all(FLERR,"Could not find custom per-atom property ID: {}", name);
+         if (argindex[nfield+nthresh] == 0) {
+           if (flag || cols)
+-            error->all(FLERR,
+-                       "Property integer vector for dump custom does not exist");
++            error->all(FLERR,"Property integer vector for dump custom does not exist");
+           thresh_array[nthresh] = IVEC;
+         } else {
+           if (flag || !cols)
+-            error->all(FLERR,
+-                       "Property integer array for dump custom does not exist");
++            error->all(FLERR,"Property integer array for dump custom does not exist");
+           if (argindex[nfield+nthresh] > atom->icols[n])
+-            error->all(FLERR,
+-                       "Dump custom property array is accessed out-of-range");
++            error->all(FLERR,"Dump custom property array is accessed out-of-range");
+           thresh_array[nthresh] = IARRAY;
+         }
+ 
+-        field2index[nfield+nthresh] = add_custom(name,0);
++        field2index[nfield+nthresh] = add_custom(name,thresh_array[nthresh]);
+         break;
+ 
+       // no match
+
+From 1e9da5a25b5e410d31c787c4bfb3db5d6340ec11 Mon Sep 17 00:00:00 2001
+From: Axel Kohlmeyer <akohlmey@gmail.com>
+Date: Sun, 17 Oct 2021 10:58:33 -0400
+Subject: [PATCH 13/19] port dump vtk to correctly support custom per-atom
+ arrays and fix some bugs
+
+---
+ src/VTK/dump_vtk.cpp | 618 +++++++++++++++++++++++++------------------
+ 1 file changed, 364 insertions(+), 254 deletions(-)
+
+diff --git a/src/VTK/dump_vtk.cpp b/src/VTK/dump_vtk.cpp
+index a7aabe3f51b..54dc0d4b0e3 100644
+--- a/src/VTK/dump_vtk.cpp
++++ b/src/VTK/dump_vtk.cpp
+@@ -31,6 +31,7 @@
+ #include "domain.h"
+ #include "error.h"
+ #include "fix.h"
++#include "fix_store.h"
+ #include "force.h"
+ #include "group.h"
+ #include "input.h"
+@@ -87,9 +88,9 @@ enum{X,Y,Z, // required for vtk, must come first
+      Q,MUX,MUY,MUZ,MU,RADIUS,DIAMETER,
+      OMEGAX,OMEGAY,OMEGAZ,ANGMOMX,ANGMOMY,ANGMOMZ,
+      TQX,TQY,TQZ,
+-     VARIABLE,COMPUTE,FIX,INAME,DNAME,
++     COMPUTE,FIX,VARIABLE,IVEC,DVEC,IARRAY,DARRAY,
+      ATTRIBUTES}; // must come last
+-enum{LT,LE,GT,GE,EQ,NEQ};
++enum{LT,LE,GT,GE,EQ,NEQ,XOR};
+ enum{VTK,VTP,VTU,PVTP,PVTU}; // file formats
+ 
+ #define ONEFIELD 32
+@@ -119,11 +120,10 @@ DumpVTK::DumpVTK(LAMMPS *lmp, int narg, char **arg) :
+   // ioptional = start of additional optional args
+   // only dump image and dump movie styles process optional args
+ 
+-  ioptional = parse_fields(narg,arg);
++  ioptional = parse_fields(nargnew,earg);
+ 
+-  if (ioptional < narg &&
+-      strcmp(style,"image") != 0 && strcmp(style,"movie") != 0)
+-    error->all(FLERR,"Invalid attribute in dump vtk command");
++  if (ioptional < nargnew)
++    error->all(FLERR,"Invalid attribute {} in dump vtk command", earg[ioptional]);
+   size_one = pack_choice.size();
+   current_pack_choice_key = -1;
+ 
+@@ -210,38 +210,40 @@ void DumpVTK::init_style()
+   else
+     write_choice = &DumpVTK::write_vtk;
+ 
+-  // find current ptr for each compute,fix,variable
++  // find current ptr for each compute,fix,variable and custom atom property
+   // check that fix frequency is acceptable
+ 
+-  int icompute;
+   for (int i = 0; i < ncompute; i++) {
+-    icompute = modify->find_compute(id_compute[i]);
++    int icompute = modify->find_compute(id_compute[i]);
+     if (icompute < 0) error->all(FLERR,"Could not find dump vtk compute ID");
+     compute[i] = modify->compute[icompute];
+   }
+ 
+-  int ifix;
+   for (int i = 0; i < nfix; i++) {
+-    ifix = modify->find_fix(id_fix[i]);
++    int ifix = modify->find_fix(id_fix[i]);
+     if (ifix < 0) error->all(FLERR,"Could not find dump vtk fix ID");
+     fix[i] = modify->fix[ifix];
+     if (nevery % modify->fix[ifix]->peratom_freq)
+       error->all(FLERR,"Dump vtk and fix not computed at compatible times");
+   }
+ 
+-  int ivariable;
+   for (int i = 0; i < nvariable; i++) {
+-    ivariable = input->variable->find(id_variable[i]);
++    int ivariable = input->variable->find(id_variable[i]);
+     if (ivariable < 0)
+       error->all(FLERR,"Could not find dump vtk variable name");
+     variable[i] = ivariable;
+   }
+ 
+-  int icustom;
++  int icustom,flag,cols;
+   for (int i = 0; i < ncustom; i++) {
+-    icustom = atom->find_custom(id_custom[i],flag_custom[i]);
++    icustom = atom->find_custom(id_custom[i],flag,cols);
+     if (icustom < 0)
+       error->all(FLERR,"Could not find custom per-atom property ID");
++    custom[i] = icustom;
++    if (!flag && !cols) custom_flag[i] = IVEC;
++    else if (flag && !cols) custom_flag[i] = DVEC;
++    else if (!flag && cols) custom_flag[i] = IARRAY;
++    else if (flag && cols) custom_flag[i] = DARRAY;
+   }
+ 
+   // set index and check validity of region
+@@ -275,7 +277,7 @@ int DumpVTK::count()
+ 
+   // grow choose and variable vbuf arrays if needed
+ 
+-  int nlocal = atom->nlocal;
++  const int nlocal = atom->nlocal;
+   if (atom->nmax > maxlocal) {
+     maxlocal = atom->nmax;
+ 
+@@ -345,10 +347,10 @@ int DumpVTK::count()
+   // un-choose if any threshold criterion isn't met
+ 
+   if (nthresh) {
+-    double *ptr;
++    double *ptr,*ptrhold;
++    double *values;
+     double value;
+-    int nstride;
+-    int nlocal = atom->nlocal;
++    int nstride,lastflag;
+ 
+     for (int ithresh = 0; ithresh < nthresh; ithresh++) {
+ 
+@@ -635,26 +637,22 @@ int DumpVTK::count()
+         nstride = 1;
+       } else if (thresh_array[ithresh] == MUX) {
+         if (!atom->mu_flag)
+-          error->all(FLERR,
+-                     "Threshold for an atom property that isn't allocated");
++          error->all(FLERR,"Threshold for an atom property that isn't allocated");
+         ptr = &atom->mu[0][0];
+         nstride = 4;
+       } else if (thresh_array[ithresh] == MUY) {
+         if (!atom->mu_flag)
+-          error->all(FLERR,
+-                     "Threshold for an atom property that isn't allocated");
++          error->all(FLERR,"Threshold for an atom property that isn't allocated");
+         ptr = &atom->mu[0][1];
+         nstride = 4;
+       } else if (thresh_array[ithresh] == MUZ) {
+         if (!atom->mu_flag)
+-          error->all(FLERR,
+-                     "Threshold for an atom property that isn't allocated");
++          error->all(FLERR,"Threshold for an atom property that isn't allocated");
+         ptr = &atom->mu[0][2];
+         nstride = 4;
+       } else if (thresh_array[ithresh] == MU) {
+         if (!atom->mu_flag)
+-          error->all(FLERR,
+-                     "Threshold for an atom property that isn't allocated");
++          error->all(FLERR,"Threshold for an atom property that isn't allocated");
+         ptr = &atom->mu[0][3];
+         nstride = 4;
+ 
+@@ -753,9 +751,8 @@ int DumpVTK::count()
+         nstride = 1;
+ 
+       } else if (thresh_array[ithresh] == IVEC) {
+-        int iwhich,flag,cols
+         i = ATTRIBUTES + nfield + ithresh;
+-        iwhich = atom->find_custom(id_custom[field2index[i]],flag,cols);
++        int iwhich = custom[field2index[i]];
+         int *ivector = atom->ivector[iwhich];
+         for (i = 0; i < nlocal; i++)
+           dchoose[i] = ivector[i];
+@@ -763,16 +760,14 @@ int DumpVTK::count()
+         nstride = 1;
+ 
+       } else if (thresh_array[ithresh] == DVEC) {
+-        int iwhich,flag,cols;
+         i = ATTRIBUTES + nfield + ithresh;
+-        iwhich = atom->find_custom(id_custom[field2index[i]],flag,cols);
++        int iwhich = custom[field2index[i]];
+         ptr = atom->dvector[iwhich];
+         nstride = 1;
+ 
+       } else if (thresh_array[ithresh] == IARRAY) {
+-        int iwhich,flag,cols;
+         i = ATTRIBUTES + nfield + ithresh;
+-        iwhich = atom->find_custom(id_custom[field2index[i]],flag,cols);
++        int iwhich = custom[field2index[i]];
+         int **iarray = atom->iarray[iwhich];
+         int icol = argindex[i] - 1;
+         for (i = 0; i < nlocal; i++)
+@@ -781,43 +776,99 @@ int DumpVTK::count()
+         nstride = 1;
+ 
+       } else if (thresh_array[ithresh] == DARRAY) {
+-        int iwhich,flag,cols;
+         i = ATTRIBUTES + nfield + ithresh;
+-        iwhich = atom->find_custom(id_custom[field2index[i]],flag,cols)
++        int iwhich = custom[field2index[i]];
+         double **darray = atom->darray[iwhich];
+         ptr = &darray[0][argindex[i]-1];
+         nstride = atom->dcols[iwhich];
+       }
+ 
+       // unselect atoms that don't meet threshold criterion
++      // compare to single value or values stored in threshfix
++      // copy ptr attribute into thresh_fix if this is first comparison
+ 
+-      value = thresh_value[ithresh];
++      if (thresh_last[ithresh] < 0) {
++        lastflag = 0;
++        value = thresh_value[ithresh];
++      } else {
++        lastflag = 1;
++        int ilast = thresh_last[ithresh];
++        values = thresh_fix[ilast]->vstore;
++        ptrhold = ptr;
++        if (thresh_first[ilast]) {
++          thresh_first[ilast] = 0;
++          for (i = 0; i < nlocal; i++, ptr += nstride) values[i] = *ptr;
++          ptr = ptrhold;
++        }
++      }
+ 
+-      switch (thresh_op[ithresh]) {
+-      case LT:
+-        for (i = 0; i < nlocal; i++, ptr += nstride)
+-          if (choose[i] && *ptr >= value) choose[i] = 0;
+-        break;
+-      case LE:
+-        for (i = 0; i < nlocal; i++, ptr += nstride)
+-          if (choose[i] && *ptr > value) choose[i] = 0;
+-        break;
+-      case GT:
+-        for (i = 0; i < nlocal; i++, ptr += nstride)
+-          if (choose[i] && *ptr <= value) choose[i] = 0;
+-        break;
+-      case GE:
+-        for (i = 0; i < nlocal; i++, ptr += nstride)
+-          if (choose[i] && *ptr < value) choose[i] = 0;
+-        break;
+-      case EQ:
+-        for (i = 0; i < nlocal; i++, ptr += nstride)
+-          if (choose[i] && *ptr != value) choose[i] = 0;
+-        break;
+-      case NEQ:
+-        for (i = 0; i < nlocal; i++, ptr += nstride)
+-          if (choose[i] && *ptr == value) choose[i] = 0;
+-        break;
++      if (thresh_op[ithresh] == LT) {
++        if (lastflag) {
++          for (i = 0; i < nlocal; i++, ptr += nstride)
++            if (choose[i] && *ptr >= values[i]) choose[i] = 0;
++        } else {
++          for (i = 0; i < nlocal; i++, ptr += nstride)
++            if (choose[i] && *ptr >= value) choose[i] = 0;
++        }
++      } else if (thresh_op[ithresh] == LE) {
++        if (lastflag) {
++          for (i = 0; i < nlocal; i++, ptr += nstride)
++            if (choose[i] && *ptr > values[i]) choose[i] = 0;
++        } else {
++          for (i = 0; i < nlocal; i++, ptr += nstride)
++            if (choose[i] && *ptr > value) choose[i] = 0;
++        }
++      } else if (thresh_op[ithresh] == GT) {
++        if (lastflag) {
++          for (i = 0; i < nlocal; i++, ptr += nstride)
++            if (choose[i] && *ptr <= values[i]) choose[i] = 0;
++        } else {
++          for (i = 0; i < nlocal; i++, ptr += nstride)
++            if (choose[i] && *ptr <= value) choose[i] = 0;
++        }
++      } else if (thresh_op[ithresh] == GE) {
++        if (lastflag) {
++          for (i = 0; i < nlocal; i++, ptr += nstride)
++            if (choose[i] && *ptr < values[i]) choose[i] = 0;
++        } else {
++          for (i = 0; i < nlocal; i++, ptr += nstride)
++            if (choose[i] && *ptr < value) choose[i] = 0;
++        }
++      } else if (thresh_op[ithresh] == EQ) {
++        if (lastflag) {
++          for (i = 0; i < nlocal; i++, ptr += nstride)
++            if (choose[i] && *ptr != values[i]) choose[i] = 0;
++        } else {
++          for (i = 0; i < nlocal; i++, ptr += nstride)
++            if (choose[i] && *ptr != value) choose[i] = 0;
++        }
++      } else if (thresh_op[ithresh] == NEQ) {
++        if (lastflag) {
++          for (i = 0; i < nlocal; i++, ptr += nstride)
++            if (choose[i] && *ptr == values[i]) choose[i] = 0;
++        } else {
++          for (i = 0; i < nlocal; i++, ptr += nstride)
++            if (choose[i] && *ptr == value) choose[i] = 0;
++        }
++      } else if (thresh_op[ithresh] == XOR) {
++        if (lastflag) {
++          for (i = 0; i < nlocal; i++, ptr += nstride)
++            if ((choose[i] && *ptr == 0.0 && values[i] == 0.0) ||
++                (*ptr != 0.0 && values[i] != 0.0))
++              choose[i] = 0;
++        } else {
++          for (i = 0; i < nlocal; i++, ptr += nstride)
++            if ((choose[i] && *ptr == 0.0 && value == 0.0) ||
++                (*ptr != 0.0 && value != 0.0))
++              choose[i] = 0;
++        }
++      }
++
++      // update values stored in threshfix
++
++      if (lastflag) {
++        ptr = ptrhold;
++        for (i = 0; i < nlocal; i++, ptr += nstride) values[i] = *ptr;
+       }
+     }
+   }
+@@ -1754,15 +1805,16 @@ int DumpVTK::parse_fields(int narg, char **arg)
+ 
+     } else {
+ 
+-      int n,tmp;
++      int n,flag,cols;
+       ArgInfo argi(arg[iarg],ArgInfo::COMPUTE|ArgInfo::FIX|ArgInfo::VARIABLE
+-                   |ArgInfo::DVEC|ArgInfo::IVEC);
++                   |ArgInfo::DNAME|ArgInfo::INAME);
+       argindex[ATTRIBUTES+i] = argi.get_index1();
++      auto aname = argi.get_name();
+ 
+       switch (argi.get_type()) {
+ 
+       case ArgInfo::UNKNOWN:
+-        error->all(FLERR,"Invalid attribute in dump vtk command");
++        error->all(FLERR,"Invalid attribute in dump vtk command: {}",arg[iarg]);
+         break;
+ 
+       // compute value = c_ID
+@@ -1772,21 +1824,19 @@ int DumpVTK::parse_fields(int narg, char **arg)
+         pack_choice[ATTRIBUTES+i] = &DumpVTK::pack_compute;
+         vtype[ATTRIBUTES+i] = Dump::DOUBLE;
+ 
+-        n = modify->find_compute(argi.get_name());
+-        if (n < 0) error->all(FLERR,"Could not find dump vtk compute ID");
++        n = modify->find_compute(aname);
++        if (n < 0) error->all(FLERR,"Could not find dump vtk compute ID: {}",aname);
+         if (modify->compute[n]->peratom_flag == 0)
+-          error->all(FLERR,"Dump vtk compute does not compute per-atom info");
++          error->all(FLERR,"Dump vtk compute {} does not compute per-atom info",aname);
+         if (argi.get_dim() == 0 && modify->compute[n]->size_peratom_cols > 0)
+-          error->all(FLERR,
+-                     "Dump vtk compute does not calculate per-atom vector");
++          error->all(FLERR,"Dump vtk compute {} does not calculate per-atom vector",aname);
+         if (argi.get_dim() > 0 && modify->compute[n]->size_peratom_cols == 0)
+-          error->all(FLERR,
+-                     "Dump vtk compute does not calculate per-atom array");
++          error->all(FLERR,"Dump vtk compute {} does not calculate per-atom array",aname);
+         if (argi.get_dim() > 0 &&
+             argi.get_index1() > modify->compute[n]->size_peratom_cols)
+-          error->all(FLERR,"Dump vtk compute vector is accessed out-of-range");
++          error->all(FLERR,"Dump vtk compute {} vector is accessed out-of-range",aname);
+ 
+-        field2index[ATTRIBUTES+i] = add_compute(argi.get_name());
++        field2index[ATTRIBUTES+i] = add_compute(aname);
+         name[ATTRIBUTES+i] = arg[iarg];
+         break;
+ 
+@@ -1797,19 +1847,19 @@ int DumpVTK::parse_fields(int narg, char **arg)
+         pack_choice[ATTRIBUTES+i] = &DumpVTK::pack_fix;
+         vtype[ATTRIBUTES+i] = Dump::DOUBLE;
+ 
+-        n = modify->find_fix(argi.get_name());
+-        if (n < 0) error->all(FLERR,"Could not find dump vtk fix ID");
++        n = modify->find_fix(aname);
++        if (n < 0) error->all(FLERR,"Could not find dump vtk fix ID: {}",aname);
+         if (modify->fix[n]->peratom_flag == 0)
+-          error->all(FLERR,"Dump vtk fix does not compute per-atom info");
++          error->all(FLERR,"Dump vtk fix {} does not compute per-atom info",aname);
+         if (argi.get_dim() == 0 && modify->fix[n]->size_peratom_cols > 0)
+-          error->all(FLERR,"Dump vtk fix does not compute per-atom vector");
++          error->all(FLERR,"Dump vtk fix {} does not compute per-atom vector",aname);
+         if (argi.get_dim() > 0 && modify->fix[n]->size_peratom_cols == 0)
+-          error->all(FLERR,"Dump vtk fix does not compute per-atom array");
++          error->all(FLERR,"Dump vtk fix {} does not compute per-atom array",aname);
+         if (argi.get_dim() > 0 &&
+             argi.get_index1() > modify->fix[n]->size_peratom_cols)
+-          error->all(FLERR,"Dump vtk fix vector is accessed out-of-range");
++          error->all(FLERR,"Dump vtk fix {} vector is accessed out-of-range",aname);
+ 
+-        field2index[ATTRIBUTES+i] = add_fix(argi.get_name());
++        field2index[ATTRIBUTES+i] = add_fix(aname);
+         name[ATTRIBUTES+i] = arg[iarg];
+         break;
+ 
+@@ -1819,61 +1869,62 @@ int DumpVTK::parse_fields(int narg, char **arg)
+         pack_choice[ATTRIBUTES+i] = &DumpVTK::pack_variable;
+         vtype[ATTRIBUTES+i] = Dump::DOUBLE;
+ 
+-        n = input->variable->find(argi.get_name());
+-        if (n < 0) error->all(FLERR,"Could not find dump vtk variable name");
++        n = input->variable->find(aname);
++        if (n < 0) error->all(FLERR,"Could not find dump vtk variable name {}",aname);
+         if (input->variable->atomstyle(n) == 0)
+-          error->all(FLERR,"Dump vtk variable is not atom-style variable");
++          error->all(FLERR,"Dump vtk variable {} is not atom-style variable",aname);
+ 
+-        field2index[ATTRIBUTES+i] = add_variable(argi.get_name());
++        field2index[ATTRIBUTES+i] = add_variable(aname);
+         name[ATTRIBUTES+i] = arg[iarg];
+         break;
+ 
+-      // custom per-atom integer vector = i_ID
++      // custom per-atom floating point vector or array = d_ID d2_ID
+ 
+-      case ArgInfo::INAME:
++      case ArgInfo::DNAME:
+         pack_choice[ATTRIBUTES+i] = &DumpVTK::pack_custom;
+-        vtype[ATTRIBUTES+i] = Dump::INT;
+-
+-        tmp = -1;
+-        n = atom->find_custom(argi.get_name(),tmp);
+-        if (n < 0)
+-          error->all(FLERR,"Could not find custom per-atom property ID");
++        vtype[ATTRIBUTES+i] = Dump::DOUBLE;
+ 
+-        if (tmp != 0)
+-          error->all(FLERR,"Custom per-atom property ID is not integer");
++        n = atom->find_custom(aname,flag,cols);
+ 
+-        field2index[ATTRIBUTES+i] = add_custom(argi.get_name(),0);
++        if (n < 0)
++          error->all(FLERR,"Could not find custom per-atom property ID: {}", aname);
++        if (argindex[ATTRIBUTES+i] == 0) {
++          if (!flag || cols)
++            error->all(FLERR,"Property double vector {} for dump vtk does not exist",aname);
++        } else {
++          if (!flag || !cols)
++            error->all(FLERR,"Property double array {} for dump vtk does not exist",aname);
++          if (argindex[ATTRIBUTES+i] > atom->dcols[n])
++            error->all(FLERR,"Dump vtk property array {} is accessed out-of-range",aname);
++        }
++        field2index[ATTRIBUTES+i] = add_custom(aname,1);
+         name[ATTRIBUTES+i] = arg[iarg];
+         break;
+ 
+-      // custom per-atom floating point vector = d_ID
++      // custom per-atom integer vector or array = i_ID or i2_ID
+ 
+-      case ArgInfo::DNAME:
++      case ArgInfo::INAME:
+         pack_choice[ATTRIBUTES+i] = &DumpVTK::pack_custom;
+-        vtype[ATTRIBUTES+i] = Dump::DOUBLE;
+-
+-        tmp = -1;
+-        n = atom->find_custom(argi.get_name(),tmp);
+-        if (n < 0)
+-          error->all(FLERR,"Could not find custom per-atom property ID");
++        vtype[ATTRIBUTES+i] = Dump::INT;
+ 
+-        if (tmp != 1)
+-          error->all(FLERR,"Custom per-atom property ID is not floating point");
++        n = atom->find_custom(aname,flag,cols);
+ 
+-        field2index[ATTRIBUTES+i] = add_custom(argi.get_name(),1);
++        if (n < 0)
++          error->all(FLERR,"Could not find custom per-atom property ID: {}", aname);
++        if (argindex[ATTRIBUTES+i] == 0) {
++          if (flag || cols)
++            error->all(FLERR,"Property integer vector {} for dump vtk does not exist",aname);
++        } else {
++          if (flag || !cols)
++            error->all(FLERR,"Property integer array {} for dump vtk does not exist",aname);
++          if (argindex[ATTRIBUTES+i] > atom->icols[n])
++            error->all(FLERR,"Dump vtk property array {} is accessed out-of-range",aname);
++        }
++        field2index[ATTRIBUTES+i] = add_custom(aname,0);
+         name[ATTRIBUTES+i] = arg[iarg];
+         break;
+ 
+-      // NEWSTYLE
+-      // custom per-atom integer array = i2_ID
+-
+-      case ArgInfo::IARRAY:
+-        return iarg;
+-
+-      // custom per-atom floating point array = d2_ID
+-
+-      case ArgInfo::DARRAY:
+-        return iarg;
++      // no match
+ 
+       default:
+         return iarg;
+@@ -1948,12 +1999,10 @@ int DumpVTK::add_compute(const char *id)
+ 
+   id_compute = (char **)
+     memory->srealloc(id_compute,(ncompute+1)*sizeof(char *),"dump:id_compute");
+-  delete [] compute;
++  delete[] compute;
+   compute = new Compute*[ncompute+1];
+ 
+-  int n = strlen(id) + 1;
+-  id_compute[ncompute] = new char[n];
+-  strcpy(id_compute[ncompute],id);
++  id_compute[ncompute] = utils::strdup(id);
+   ncompute++;
+   return ncompute-1;
+ }
+@@ -1973,12 +2022,10 @@ int DumpVTK::add_fix(const char *id)
+ 
+   id_fix = (char **)
+     memory->srealloc(id_fix,(nfix+1)*sizeof(char *),"dump:id_fix");
+-  delete [] fix;
++  delete[] fix;
+   fix = new Fix*[nfix+1];
+ 
+-  int n = strlen(id) + 1;
+-  id_fix[nfix] = new char[n];
+-  strcpy(id_fix[nfix],id);
++  id_fix[nfix] = utils::strdup(id);
+   nfix++;
+   return nfix-1;
+ }
+@@ -1999,22 +2046,20 @@ int DumpVTK::add_variable(const char *id)
+   id_variable = (char **)
+     memory->srealloc(id_variable,(nvariable+1)*sizeof(char *),
+                      "dump:id_variable");
+-  delete [] variable;
++  delete[] variable;
+   variable = new int[nvariable+1];
+-  delete [] vbuf;
++  delete[] vbuf;
+   vbuf = new double*[nvariable+1];
+   for (int i = 0; i <= nvariable; i++) vbuf[i] = nullptr;
+ 
+-  int n = strlen(id) + 1;
+-  id_variable[nvariable] = new char[n];
+-  strcpy(id_variable[nvariable],id);
++  id_variable[nvariable] = utils::strdup(id);
+   nvariable++;
+   return nvariable-1;
+ }
+ 
+ /* ----------------------------------------------------------------------
+    add custom atom property to list used by dump
+-   return index of where this property is in list
++   return index of where this property is in Atom class custom lists
+    if already in list, do not add, just return index, else add to list
+ ------------------------------------------------------------------------- */
+ 
+@@ -2022,21 +2067,17 @@ int DumpVTK::add_custom(const char *id, int flag)
+ {
+   int icustom;
+   for (icustom = 0; icustom < ncustom; icustom++)
+-    if ((strcmp(id,id_custom[icustom]) == 0)
+-        && (flag == flag_custom[icustom])) break;
++    if (strcmp(id,id_custom[icustom]) == 0) break;
+   if (icustom < ncustom) return icustom;
+ 
+-  id_custom = (char **)
+-    memory->srealloc(id_custom,(ncustom+1)*sizeof(char *),"dump:id_custom");
+-  flag_custom = (int *)
+-    memory->srealloc(flag_custom,(ncustom+1)*sizeof(int),"dump:flag_custom");
+-
+-  int n = strlen(id) + 1;
+-  id_custom[ncustom] = new char[n];
+-  strcpy(id_custom[ncustom],id);
+-  flag_custom[ncustom] = flag;
++  id_custom = (char **) memory->srealloc(id_custom,(ncustom+1)*sizeof(char *),"dump:id_custom");
++  custom = (int *) memory->srealloc(custom,(ncustom+1)*sizeof(int),"dump:custom");
++  custom_flag = (int *) memory->srealloc(custom_flag,(ncustom+1)*sizeof(int),"dump:custom_flag");
+ 
++  id_custom[ncustom] = utils::strdup(id);
++  custom_flag[ncustom] = flag;
+   ncustom++;
++
+   return ncustom-1;
+ }
+ 
+@@ -2050,21 +2091,17 @@ int DumpVTK::modify_param(int narg, char **arg)
+     else {
+       iregion = domain->find_region(arg[1]);
+       if (iregion == -1)
+-        error->all(FLERR,"Dump_modify region ID does not exist");
+-      delete [] idregion;
+-      int n = strlen(arg[1]) + 1;
+-      idregion = new char[n];
+-      strcpy(idregion,arg[1]);
++        error->all(FLERR,"Dump_modify region ID {} does not exist",arg[1]);
++      delete[] idregion;
++      idregion = utils::strdup(arg[1]);
+     }
+     return 2;
+   }
+ 
+   if (strcmp(arg[0],"label") == 0) {
+      if (narg < 2) error->all(FLERR,"Illegal dump_modify command [label]");
+-     delete [] label;
+-     int n = strlen(arg[1]) + 1;
+-     label = new char[n];
+-     strcpy(label,arg[1]);
++     delete[] label;
++     label = utils::strdup(arg[1]);
+      return 2;
+    }
+ 
+@@ -2076,23 +2113,29 @@ int DumpVTK::modify_param(int narg, char **arg)
+ 
+   if (strcmp(arg[0],"element") == 0) {
+     if (narg < ntypes+1)
+-      error->all(FLERR,"Dump modify: number of element names do not match atom types");
+-
+-    if (typenames) {
+-      for (int i = 1; i <= ntypes; i++) delete [] typenames[i];
+-      delete [] typenames;
+-      typenames = nullptr;
+-    }
++      error->all(FLERR,"Number of dump_modify element names does not match number of atom types");
+ 
++    for (int i = 1; i <= ntypes; i++) delete[] typenames[i];
++    delete[] typenames;
+     typenames = new char*[ntypes+1];
+     for (int itype = 1; itype <= ntypes; itype++) {
+-      int n = strlen(arg[itype]) + 1;
+-      typenames[itype] = new char[n];
+-      strcpy(typenames[itype],arg[itype]);
++      typenames[itype] = utils::strdup(arg[itype]);
+     }
+     return ntypes+1;
+   }
+ 
++  if (strcmp(arg[0],"refresh") == 0) {
++    if (narg < 2) error->all(FLERR,"Illegal dump_modify command");
++    ArgInfo argi(arg[1],ArgInfo::COMPUTE);
++    if ((argi.get_type() != ArgInfo::COMPUTE) || (argi.get_dim() != 0))
++      error->all(FLERR,"Illegal dump_modify command");
++    if (refreshflag) error->all(FLERR,"Dump_modify can only have one refresh");
++
++    refreshflag = 1;
++    refresh = argi.copy_name();
++    return 2;
++  }
++
+   if (strcmp(arg[0],"thresh") == 0) {
+     if (narg < 2) error->all(FLERR,"Illegal dump_modify command");
+     if (strcmp(arg[1],"none") == 0) {
+@@ -2103,8 +2146,16 @@ int DumpVTK::modify_param(int narg, char **arg)
+         thresh_array = nullptr;
+         thresh_op = nullptr;
+         thresh_value = nullptr;
++        thresh_last = nullptr;
++        for (int i = 0; i < nthreshlast; i++) {
++          modify->delete_fix(thresh_fixID[i]);
++          delete[] thresh_fixID[i];
++        }
++        thresh_fix = nullptr;
++        thresh_fixID = nullptr;
++        thresh_first = nullptr;
+       }
+-      nthresh = 0;
++      nthresh = nthreshlast = 0;
+       return 2;
+     }
+ 
+@@ -2115,6 +2166,7 @@ int DumpVTK::modify_param(int narg, char **arg)
+     memory->grow(thresh_array,nthresh+1,"dump:thresh_array");
+     memory->grow(thresh_op,(nthresh+1),"dump:thresh_op");
+     memory->grow(thresh_value,(nthresh+1),"dump:thresh_value");
++    memory->grow(thresh_last,(nthresh+1),"dump:thresh_last");
+ 
+     // set attribute type of threshold
+     // customize by adding to if statement
+@@ -2197,98 +2249,125 @@ int DumpVTK::modify_param(int narg, char **arg)
+     else if (strcmp(arg[1],"tqy") == 0) thresh_array[nthresh] = TQY;
+     else if (strcmp(arg[1],"tqz") == 0) thresh_array[nthresh] = TQZ;
+ 
+-    // compute value = c_ID
+-    // if no trailing [], then arg is set to 0, else arg is between []
++    // compute or fix or variable or custom vector/array
+ 
+-    else if (strncmp(arg[1],"c_",2) == 0) {
+-      thresh_array[nthresh] = COMPUTE;
+-      int n = strlen(arg[1]);
+-      char *suffix = new char[n];
+-      strcpy(suffix,&arg[1][2]);
++    else {
++      int n,flag,cols;
++      ArgInfo argi(arg[1],ArgInfo::COMPUTE|ArgInfo::FIX|ArgInfo::VARIABLE
++                   |ArgInfo::DNAME|ArgInfo::INAME);
++      argindex[ATTRIBUTES+nfield+nthresh] = argi.get_index1();
++      auto aname = argi.get_name();
+ 
+-      char *ptr = strchr(suffix,'[');
+-      if (ptr) {
+-        if (suffix[strlen(suffix)-1] != ']')
+-          error->all(FLERR,"Invalid attribute in dump modify command");
+-        argindex[ATTRIBUTES+nfield+nthresh] = atoi(ptr+1);
+-        *ptr = '\0';
+-      } else argindex[ATTRIBUTES+nfield+nthresh] = 0;
+-
+-      n = modify->find_compute(suffix);
+-      if (n < 0) error->all(FLERR,"Could not find dump modify compute ID");
+-
+-      if (modify->compute[n]->peratom_flag == 0)
+-        error->all(FLERR,
+-                   "Dump modify compute ID does not compute per-atom info");
+-      if (argindex[ATTRIBUTES+nfield+nthresh] == 0 &&
+-          modify->compute[n]->size_peratom_cols > 0)
+-        error->all(FLERR,
+-                   "Dump modify compute ID does not compute per-atom vector");
+-      if (argindex[ATTRIBUTES+nfield+nthresh] > 0 &&
+-          modify->compute[n]->size_peratom_cols == 0)
+-        error->all(FLERR,
+-                   "Dump modify compute ID does not compute per-atom array");
+-      if (argindex[ATTRIBUTES+nfield+nthresh] > 0 &&
+-          argindex[ATTRIBUTES+nfield+nthresh] > modify->compute[n]->size_peratom_cols)
+-        error->all(FLERR,"Dump modify compute ID vector is not large enough");
+-
+-      field2index[ATTRIBUTES+nfield+nthresh] = add_compute(suffix);
+-      delete [] suffix;
+-
+-    // fix value = f_ID
+-    // if no trailing [], then arg is set to 0, else arg is between []
+-
+-    } else if (strncmp(arg[1],"f_",2) == 0) {
+-      thresh_array[nthresh] = FIX;
+-      int n = strlen(arg[1]);
+-      char *suffix = new char[n];
+-      strcpy(suffix,&arg[1][2]);
+-
+-      char *ptr = strchr(suffix,'[');
+-      if (ptr) {
+-        if (suffix[strlen(suffix)-1] != ']')
+-          error->all(FLERR,"Invalid attribute in dump modify command");
+-        argindex[ATTRIBUTES+nfield+nthresh] = atoi(ptr+1);
+-        *ptr = '\0';
+-      } else argindex[ATTRIBUTES+nfield+nthresh] = 0;
++      switch (argi.get_type()) {
++
++      case ArgInfo::UNKNOWN:
++        error->all(FLERR,"Invalid attribute in dump modify command");
++        break;
++
++      // compute value = c_ID
++      // if no trailing [], then arg is set to 0, else arg is between []
++
++      case ArgInfo::COMPUTE:
++        thresh_array[nthresh] = COMPUTE;
++        n = modify->find_compute(aname);
++        if (n < 0) error->all(FLERR,"Could not find dump modify compute ID: {}",aname);
++
++        if (modify->compute[n]->peratom_flag == 0)
++          error->all(FLERR,"Dump modify compute ID {} does not compute per-atom info",aname);
++        if (argi.get_dim() == 0 && modify->compute[n]->size_peratom_cols > 0)
++          error->all(FLERR,"Dump modify compute ID {} does not compute per-atom vector",aname);
++        if (argi.get_index1() > 0 && modify->compute[n]->size_peratom_cols == 0)
++          error->all(FLERR,"Dump modify compute ID {} does not compute per-atom array",aname);
++        if (argi.get_index1() > 0 &&
++            argi.get_index1() > modify->compute[n]->size_peratom_cols)
++          error->all(FLERR,"Dump modify compute ID {} vector is not large enough",aname);
++
++        field2index[ATTRIBUTES+nfield+nthresh] = add_compute(aname);
++        break;
++
++      // fix value = f_ID
++      // if no trailing [], then arg is set to 0, else arg is between []
++
++      case ArgInfo::FIX:
++        thresh_array[nthresh] = FIX;
++        n = modify->find_fix(aname);
++        if (n < 0) error->all(FLERR,"Could not find dump modify fix ID: {}",aname);
++
++        if (modify->fix[n]->peratom_flag == 0)
++          error->all(FLERR,"Dump modify fix ID {} does not compute per-atom info",aname);
++        if (argi.get_dim() == 0 && modify->fix[n]->size_peratom_cols > 0)
++          error->all(FLERR,"Dump modify fix ID {} does not compute per-atom vector",aname);
++        if (argi.get_index1() > 0 && modify->fix[n]->size_peratom_cols == 0)
++          error->all(FLERR,"Dump modify fix ID {} does not compute per-atom array",aname);
++        if (argi.get_index1() > 0 && argi.get_index1() > modify->fix[n]->size_peratom_cols)
++          error->all(FLERR,"Dump modify fix ID {} vector is not large enough",aname);
++
++        field2index[ATTRIBUTES+nfield+nthresh] = add_fix(aname);
++        break;
+ 
+-      n = modify->find_fix(suffix);
+-      if (n < 0) error->all(FLERR,"Could not find dump modify fix ID");
++      // variable value = v_ID
+ 
+-      if (modify->fix[n]->peratom_flag == 0)
+-        error->all(FLERR,"Dump modify fix ID does not compute per-atom info");
+-      if (argindex[ATTRIBUTES+nfield+nthresh] == 0 &&
+-          modify->fix[n]->size_peratom_cols > 0)
+-        error->all(FLERR,"Dump modify fix ID does not compute per-atom vector");
+-      if (argindex[ATTRIBUTES+nfield+nthresh] > 0 &&
+-          modify->fix[n]->size_peratom_cols == 0)
+-        error->all(FLERR,"Dump modify fix ID does not compute per-atom array");
+-      if (argindex[ATTRIBUTES+nfield+nthresh] > 0 &&
+-          argindex[ATTRIBUTES+nfield+nthresh] > modify->fix[n]->size_peratom_cols)
+-        error->all(FLERR,"Dump modify fix ID vector is not large enough");
++      case ArgInfo::VARIABLE:
++        thresh_array[nthresh] = VARIABLE;
++        n = input->variable->find(aname);
++        if (n < 0) error->all(FLERR,"Could not find dump modify variable name: {}",aname);
++        if (input->variable->atomstyle(n) == 0)
++          error->all(FLERR,"Dump modify variable {} is not atom-style variable",aname);
++
++        field2index[ATTRIBUTES+nfield+nthresh] = add_variable(aname);
++        break;
+ 
+-      field2index[ATTRIBUTES+nfield+nthresh] = add_fix(suffix);
+-      delete [] suffix;
++      // custom per atom floating point vector or array
++
++      case ArgInfo::DNAME:
++        n = atom->find_custom(aname,flag,cols);
++
++        if (n < 0)
++          error->all(FLERR,"Could not find custom per-atom property ID: {}", aname);
++        if (argindex[ATTRIBUTES+nfield+nthresh] == 0) {
++          if (!flag || cols)
++            error->all(FLERR,"Property double vector for dump custom does not exist");
++          thresh_array[nthresh] = DVEC;
++        } else {
++          if (!flag || !cols)
++            error->all(FLERR,"Property double array for dump custom does not exist");
++          if (argindex[ATTRIBUTES+nfield+nthresh] > atom->dcols[n])
++            error->all(FLERR,"Dump custom property array is accessed out-of-range");
++          thresh_array[nthresh] = DARRAY;
++        }
+ 
+-    // variable value = v_ID
++        field2index[ATTRIBUTES+nfield+nthresh] = add_custom(aname,thresh_array[nthresh]);
++        break;
+ 
+-    } else if (strncmp(arg[1],"v_",2) == 0) {
+-      thresh_array[nthresh] = VARIABLE;
+-      int n = strlen(arg[1]);
+-      char *suffix = new char[n];
+-      strcpy(suffix,&arg[1][2]);
++      // custom per atom integer vector or array
+ 
+-      argindex[ATTRIBUTES+nfield+nthresh] = 0;
++      case ArgInfo::INAME:
++        n = atom->find_custom(aname,flag,cols);
+ 
+-      n = input->variable->find(suffix);
+-      if (n < 0) error->all(FLERR,"Could not find dump modify variable name");
+-      if (input->variable->atomstyle(n) == 0)
+-        error->all(FLERR,"Dump modify variable is not atom-style variable");
++        if (n < 0)
++          error->all(FLERR,"Could not find custom per-atom property ID: {}", aname);
++        if (argindex[ATTRIBUTES+nfield+nthresh] == 0) {
++          if (flag || cols)
++            error->all(FLERR,"Property integer vector for dump custom does not exist");
++          thresh_array[nthresh] = IVEC;
++        } else {
++          if (flag || !cols)
++            error->all(FLERR,"Property integer array for dump custom does not exist");
++          if (argindex[ATTRIBUTES+nfield+nthresh] > atom->icols[n])
++            error->all(FLERR,"Dump custom property array is accessed out-of-range");
++          thresh_array[nthresh] = IARRAY;
++        }
+ 
+-      field2index[ATTRIBUTES+nfield+nthresh] = add_variable(suffix);
+-      delete [] suffix;
++        field2index[ATTRIBUTES+nfield+nthresh] = add_custom(aname,thresh_array[nthresh]);
++        break;
+ 
+-    } else error->all(FLERR,"Invalid dump_modify threshold operator");
++      // no match
++
++      default:
++        error->all(FLERR,"Invalid dump_modify thresh attribute: {}",aname);
++        break;
++      }
++    }
+ 
+     // set operation type of threshold
+ 
+@@ -2298,11 +2377,32 @@ int DumpVTK::modify_param(int narg, char **arg)
+     else if (strcmp(arg[2],">=") == 0) thresh_op[nthresh] = GE;
+     else if (strcmp(arg[2],"==") == 0) thresh_op[nthresh] = EQ;
+     else if (strcmp(arg[2],"!=") == 0) thresh_op[nthresh] = NEQ;
+-    else error->all(FLERR,"Invalid dump_modify threshold operator");
++    else if (strcmp(arg[2],"|^") == 0) thresh_op[nthresh] = XOR;
++    else error->all(FLERR,"Invalid dump_modify thresh operator");
+ 
+-    // set threshold value
++    // set threshold value as number or special LAST keyword
++    // create FixStore to hold LAST values, should work with restart
++    // id = dump-ID + nthreshlast + DUMP_STORE, fix group = dump group
+ 
+-    thresh_value[nthresh] = utils::numeric(FLERR,arg[3],false,lmp);
++    if (strcmp(arg[3],"LAST") != 0) {
++      thresh_value[nthresh] = utils::numeric(FLERR,arg[3],false,lmp);
++      thresh_last[nthresh] = -1;
++    } else {
++      thresh_fix = (FixStore **)
++        memory->srealloc(thresh_fix,(nthreshlast+1)*sizeof(FixStore *),"dump:thresh_fix");
++      thresh_fixID = (char **)
++        memory->srealloc(thresh_fixID,(nthreshlast+1)*sizeof(char *),"dump:thresh_fixID");
++      memory->grow(thresh_first,(nthreshlast+1),"dump:thresh_first");
++
++      std::string threshid = fmt::format("{}{}_DUMP_STORE",id,nthreshlast);
++      thresh_fixID[nthreshlast] = utils::strdup(threshid);
++      threshid += fmt::format(" {} STORE peratom 1 1", group->names[igroup]);
++      thresh_fix[nthreshlast] = (FixStore *) modify->add_fix(threshid);
++
++      thresh_last[nthreshlast] = nthreshlast;
++      thresh_first[nthreshlast] = 1;
++      nthreshlast++;
++    }
+ 
+     nthresh++;
+     return 4;
+@@ -2387,25 +2487,35 @@ void DumpVTK::pack_variable(int n)
+ 
+ void DumpVTK::pack_custom(int n)
+ {
+-  int index = field2index[n];
+-
+-  if (flag_custom[index] == 0) { // integer
+-    int iwhich,tmp;
+-    iwhich = atom->find_custom(id_custom[index],tmp);
++  int flag = custom_flag[field2index[current_pack_choice_key]];
++  int iwhich = custom[field2index[current_pack_choice_key]];
++  int index = argindex[current_pack_choice_key];
+ 
++  if (flag == IVEC) {
+     int *ivector = atom->ivector[iwhich];
+     for (int i = 0; i < nchoose; i++) {
+       buf[n] = ivector[clist[i]];
+       n += size_one;
+     }
+-  } else if (flag_custom[index] == 1) { // double
+-    int iwhich,tmp;
+-    iwhich = atom->find_custom(id_custom[index],tmp);
+-
++  } else if (flag == DVEC) {
+     double *dvector = atom->dvector[iwhich];
+     for (int i = 0; i < nchoose; i++) {
+       buf[n] = dvector[clist[i]];
+       n += size_one;
+     }
++  } else if (flag == IARRAY) {
++    index--;
++    int **iarray = atom->iarray[iwhich];
++    for (int i = 0; i < nchoose; i++) {
++      buf[n] = iarray[clist[i]][index];
++      n += size_one;
++    }
++  } else if (flag == DARRAY) {
++    index--;
++    double **darray = atom->darray[iwhich];
++    for (int i = 0; i < nchoose; i++) {
++      buf[n] = darray[clist[i]][index];
++      n += size_one;
++    }
+   }
+ }
+
+From 26b368848b2ca09a6a0040985f92d32a2242595e Mon Sep 17 00:00:00 2001
+From: Axel Kohlmeyer <akohlmey@gmail.com>
+Date: Sun, 17 Oct 2021 18:05:29 -0400
+Subject: [PATCH 14/19] Add support for an "Update #" appendix to the version
+ string
+
+This is for informative output only, so that any code depending
+on the LAMMPS_VERSION define will not have to be changed and no
+warnings will be printed etc.
+---
+ src/lammps.cpp          | 12 +++++++++---
+ unittest/CMakeLists.txt |  2 +-
+ 2 files changed, 10 insertions(+), 4 deletions(-)
+
+diff --git a/src/lammps.cpp b/src/lammps.cpp
+index 85410118149..f1866154241 100644
+--- a/src/lammps.cpp
++++ b/src/lammps.cpp
+@@ -59,6 +59,12 @@
+ #include "lmpinstalledpkgs.h"
+ #include "lmpgitversion.h"
+ 
++#if defined(LAMMPS_UPDATE)
++#define UPDATE_STRING " - " LAMMPS_UPDATE
++#else
++#define UPDATE_STRING ""
++#endif
++
+ static void print_style(FILE *fp, const char *str, int &pos);
+ 
+ struct LAMMPS_NS::package_styles_lists {
+@@ -509,7 +515,7 @@ LAMMPS::LAMMPS(int narg, char **arg, MPI_Comm communicator) :
+     }
+ 
+     if ((universe->me == 0) && !helpflag)
+-      utils::logmesg(this,fmt::format("LAMMPS ({})\n",version));
++      utils::logmesg(this,fmt::format("LAMMPS ({}{})\n",version,UPDATE_STRING));
+ 
+   // universe is one or more worlds, as setup by partition switch
+   // split universe communicator into separate world communicators
+@@ -1137,10 +1143,10 @@ void _noopt LAMMPS::help()
+ 
+   if (has_git_info) {
+     fprintf(fp,"\nLarge-scale Atomic/Molecular Massively Parallel Simulator - "
+-            LAMMPS_VERSION "\nGit info (%s / %s)\n\n",git_branch, git_descriptor);
++            LAMMPS_VERSION UPDATE_STRING "\nGit info (%s / %s)\n\n",git_branch, git_descriptor);
+   } else {
+     fprintf(fp,"\nLarge-scale Atomic/Molecular Massively Parallel Simulator - "
+-            LAMMPS_VERSION "\n\n");
++            LAMMPS_VERSION UPDATE_STRING "\n\n");
+   }
+   fprintf(fp,
+           "Usage example: %s -var t 300 -echo screen -in in.alloy\n\n"
+diff --git a/unittest/CMakeLists.txt b/unittest/CMakeLists.txt
+index 2491c267968..46f18659890 100644
+--- a/unittest/CMakeLists.txt
++++ b/unittest/CMakeLists.txt
+@@ -8,7 +8,7 @@ add_test(NAME RunLammps
+          WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+ set_tests_properties(RunLammps PROPERTIES
+ 	ENVIRONMENT "TSAN_OPTIONS=ignore_noninstrumented_modules=1;HWLOC_HIDE_ERRORS=1"
+-        PASS_REGULAR_EXPRESSION "^LAMMPS \\([0-9]+ [A-Za-z]+ 2[0-9][0-9][0-9]\\)")
++        PASS_REGULAR_EXPRESSION "LAMMPS \\([0-9]+ [A-Za-z]+ 2[0-9][0-9][0-9]( - Update [0-9]+)?\\)")
+ 
+ # check if the compiled executable will print the help message
+ add_test(NAME HelpMessage
+
+From 87b63f768f4f777f289620ff1ed4ad7892696009 Mon Sep 17 00:00:00 2001
+From: Richard Berger <richard.berger@temple.edu>
+Date: Mon, 18 Oct 2021 12:15:05 -0400
+Subject: [PATCH 15/19] Only check for GPU double precision support if a GPU is
+ present
+
+---
+ lib/gpu/lal_device.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lib/gpu/lal_device.cpp b/lib/gpu/lal_device.cpp
+index 47e6d6e500d..43a565c9fe4 100644
+--- a/lib/gpu/lal_device.cpp
++++ b/lib/gpu/lal_device.cpp
+@@ -1047,7 +1047,7 @@ bool lmp_has_compatible_gpu_device()
+   UCL_Device gpu;
+   bool compatible_gpu = gpu.num_platforms() > 0;
+   #if defined(_SINGLE_DOUBLE) || defined(_DOUBLE_DOUBLE)
+-  if (!gpu.double_precision(0))
++  if (compatible_gpu && !gpu.double_precision(0))
+     compatible_gpu = false;
+   #endif
+   return compatible_gpu;
+
+From 0e369fb9b5441b8353694e1501d9ea5ab7615044 Mon Sep 17 00:00:00 2001
+From: Axel Kohlmeyer <akohlmey@gmail.com>
+Date: Mon, 18 Oct 2021 13:47:29 -0400
+Subject: [PATCH 16/19] update example to represent recent style changes.
+
+---
+ doc/src/Developer_write.rst | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/doc/src/Developer_write.rst b/doc/src/Developer_write.rst
+index 37ac9ca126f..c3df6ad6bb3 100644
+--- a/doc/src/Developer_write.rst
++++ b/doc/src/Developer_write.rst
+@@ -29,7 +29,9 @@ of code in the header before include guards:
+ .. code-block:: c
+ 
+    #ifdef FIX_CLASS
+-   FixStyle(print/vel,FixPrintVel)
++   // clang-format off
++   FixStyle(print/vel,FixPrintVel);
++   // clang-format on
+    #else
+    /* the definition of the FixPrintVel class comes here */
+    ...
+
+From f9e99f1f4cd8bc1a76d44c8ac560ef3ca306efe8 Mon Sep 17 00:00:00 2001
+From: Axel Kohlmeyer <akohlmey@gmail.com>
+Date: Mon, 18 Oct 2021 18:04:04 -0400
+Subject: [PATCH 17/19] wipe out all loaded plugins before destroying the
+ LAMMPS instance
+
+---
+ src/lammps.cpp | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/src/lammps.cpp b/src/lammps.cpp
+index f1866154241..84a27b524f1 100644
+--- a/src/lammps.cpp
++++ b/src/lammps.cpp
+@@ -909,6 +909,10 @@ void LAMMPS::init()
+ 
+ void LAMMPS::destroy()
+ {
++  // must wipe out all plugins first, if configured
++#if defined(LMP_PLUGIN)
++  input->one("plugin clear");
++#endif
+   delete update;
+   update = nullptr;
+ 
+
+From 81a5beb8cca4132b3f627231db91022220e5cd5d Mon Sep 17 00:00:00 2001
+From: Axel Kohlmeyer <akohlmey@gmail.com>
+Date: Mon, 18 Oct 2021 18:13:21 -0400
+Subject: [PATCH 18/19] must not have folders names differing only in case:
+ "MC" versu "mc"
+
+This is causing problems on MacOS and Windows with case preserving
+but case insensitive file systems.
+---
+ doc/src/Examples.rst                          | 4 ++--
+ examples/{MC => MC-LOOP}/README               | 0
+ examples/{MC => MC-LOOP}/in.mc                | 0
+ examples/{MC => MC-LOOP}/log.13Oct16.mc.g++.1 | 0
+ examples/README                               | 2 +-
+ 5 files changed, 3 insertions(+), 3 deletions(-)
+ rename examples/{MC => MC-LOOP}/README (100%)
+ rename examples/{MC => MC-LOOP}/in.mc (100%)
+ rename examples/{MC => MC-LOOP}/log.13Oct16.mc.g++.1 (100%)
+
+diff --git a/doc/src/Examples.rst b/doc/src/Examples.rst
+index f91ca2db11e..c2117279029 100644
+--- a/doc/src/Examples.rst
++++ b/doc/src/Examples.rst
+@@ -80,7 +80,7 @@ Lowercase directories
+ +-------------+------------------------------------------------------------------+
+ | friction    | frictional contact of spherical asperities between 2d surfaces   |
+ +-------------+------------------------------------------------------------------+
+-| gcmc        | Grand Canonical Monte Carlo (GCMC) via the fix gcmc command      |
++| mc          | Monte Carlo features via fix gcmc, widom and other commands      |
+ +-------------+------------------------------------------------------------------+
+ | granregion  | use of fix wall/region/gran as boundary on granular particles    |
+ +-------------+------------------------------------------------------------------+
+@@ -205,7 +205,7 @@ Uppercase directories
+ +------------+--------------------------------------------------------------------------------------------------+
+ | KAPPA      | compute thermal conductivity via several methods                                                 |
+ +------------+--------------------------------------------------------------------------------------------------+
+-| MC         | using LAMMPS in a Monte Carlo mode to relax the energy of a system                               |
++| MC-LOOP    | using LAMMPS in a Monte Carlo mode to relax the energy of a system in a input script loop        |
+ +------------+--------------------------------------------------------------------------------------------------+
+ | PACKAGES   | examples for specific packages and contributed commands                                          |
+ +------------+--------------------------------------------------------------------------------------------------+
+diff --git a/examples/MC/README b/examples/MC-LOOP/README
+similarity index 100%
+rename from examples/MC/README
+rename to examples/MC-LOOP/README
+diff --git a/examples/MC/in.mc b/examples/MC-LOOP/in.mc
+similarity index 100%
+rename from examples/MC/in.mc
+rename to examples/MC-LOOP/in.mc
+diff --git a/examples/MC/log.13Oct16.mc.g++.1 b/examples/MC-LOOP/log.13Oct16.mc.g++.1
+similarity index 100%
+rename from examples/MC/log.13Oct16.mc.g++.1
+rename to examples/MC-LOOP/log.13Oct16.mc.g++.1
+diff --git a/examples/README b/examples/README
+index 50d3d52e654..c398579cdec 100644
+--- a/examples/README
++++ b/examples/README
+@@ -167,7 +167,7 @@ The KAPPA directory has example scripts for computing the thermal
+ conductivity (kappa) of a LJ liquid using 5 different methods.  See
+ the KAPPA/README file for more info.
+ 
+-The MC directory has an example script for using LAMMPS as an
++The MC-LOOP directory has an example script for using LAMMPS as an
+ energy-evaluation engine in a iterative Monte Carlo energy-relaxation
+ loop.
+ 
+
+From 1cd05511975b8465efd18cdcb82db7cf1bffade7 Mon Sep 17 00:00:00 2001
+From: Axel Kohlmeyer <akohlmey@gmail.com>
+Date: Tue, 19 Oct 2021 08:27:49 -0400
+Subject: [PATCH 19/19] more direct version of clearing out loaded plugins
+
+---
+ src/lammps.cpp | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/src/lammps.cpp b/src/lammps.cpp
+index 84a27b524f1..5d571b88ddb 100644
+--- a/src/lammps.cpp
++++ b/src/lammps.cpp
+@@ -51,6 +51,10 @@
+ #include "update.h"
+ #include "version.h"
+ 
++#if defined(LMP_PLUGIN)
++#include "plugin.h"
++#endif
++
+ #include <cctype>
+ #include <cmath>
+ #include <cstring>
+@@ -911,7 +915,7 @@ void LAMMPS::destroy()
+ {
+   // must wipe out all plugins first, if configured
+ #if defined(LMP_PLUGIN)
+-  input->one("plugin clear");
++  plugin_clear(this);
+ #endif
+   delete update;
+   update = nullptr;
