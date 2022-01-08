@@ -1,6 +1,6 @@
 {% set name = "lammps-dp" %}
 {% set version = "2.0.2" %}
-{% set lammps = "stable_29Sep2021_update1" %}
+{% set lammps = "stable_29Sep2021_update2" %}
 
 package:
   name: {{ name|lower }}
@@ -13,7 +13,7 @@ source:
     - 0001-load-deepmd-automatically.patch
    
 build:
-  number: 3
+  number: 4
   skip: True  # [not linux]
 
 requirements:
