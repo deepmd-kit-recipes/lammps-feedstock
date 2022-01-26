@@ -72,6 +72,7 @@ outputs:
         - jpeg
         - {{ pin_subpackage('pylammps-dp', exact=True) }}
     files:
+      - bin/lmp
       - lib/liblammps.so*
       - lib/pkgconfig/liblammps.pc
       - lib/cmake/LAMMPS
