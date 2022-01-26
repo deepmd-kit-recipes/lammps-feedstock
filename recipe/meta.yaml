@@ -1,4 +1,4 @@
-{% set name = "lammps-dp" %}
+{% set name = "lammps-dp-library" %}
 {% set version = "2.0.2" %}
 {% set lammps = "stable_29Sep2021_update2" %}
 
@@ -13,7 +13,7 @@ source:
     - 0001-load-deepmd-automatically.patch
    
 build:
-  number: 4
+  number: 5
   skip: True  # [not linux]
 
 requirements:
@@ -34,20 +34,59 @@ requirements:
     - libpng
     - jpeg
 
-  run:
-    - libdeepmd >={{ version }}
-    - {{ pin_compatible('mpich') }}
-    - plumed >=2
-    - fftw
-    - libpng
-    - jpeg
+outputs:
+  - name: pylammps-dp
+    build:
+      noarch: python
+    files:
+      - lib/python*/site-packages/lammps*
+    requirements:
+      host:
+        - python
+      run:
+        - python
+    test:
+      imports:
+        - lammps
 
-test:
-  commands:
-    - lmp -help
-    - test -f $PREFIX/lib/liblammps.so
-  imports:
-    - lammps
+  - name: lammps-dp
+    build:
+      string: "{{ PKG_BUILDNUM }}"  # [float_prec == 'high']
+      string: "{{ PKG_BUILDNUM }}_{{float_prec}}"  # [float_prec != 'high']
+    requirements:
+      build:
+        - {{ compiler('c') }}
+        - {{ compiler('cxx') }}
+      host:
+        - plumed >=2.4,<2.8
+        - mpich
+        - zlib
+        - fftw
+        - libpng
+        - jpeg
+      run:
+        - libdeepmd >={{ version }}
+        - {{ pin_compatible('mpich') }}
+        - plumed >=2
+        - fftw
+        - libpng
+        - jpeg
+        - {{ pin_subpackage('pylammps-dp', exact=True) }}
+    files:
+      - lib/liblammps.so*
+      - lib/pkgconfig/liblammps.pc
+      - lib/cmake/LAMMPS
+      - include/LAMMPS
+      - share/lammps
+      - share/man/man1/lmp*
+      - etc/profile.d/lammps.sh
+      - etc/profile.d/lammps.csh
+    test:
+      commands:
+        - lmp -help
+        - test -f $PREFIX/lib/liblammps.so
+      imports:
+        - lammps
 
 about:
   home: http://lammps.sandia.gov
