@@ -39,7 +39,8 @@ outputs:
     build:
       noarch: python
     files:
-      - lib/python*/site-packages/lammps/
+      - lib/python*/site-packages/lammps/*
+      - lib/python*/site-packages/lammps/*/*
       - lib/python*/site-packages/lammps*
     requirements:
       host:
