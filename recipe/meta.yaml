@@ -50,9 +50,6 @@ outputs:
         - lammps
 
   - name: lammps-dp
-    build:
-      string: "{{ PKG_BUILDNUM }}"  # [float_prec == 'high']
-      string: "{{ PKG_BUILDNUM }}_{{float_prec}}"  # [float_prec != 'high']
     requirements:
       build:
         - {{ compiler('c') }}
