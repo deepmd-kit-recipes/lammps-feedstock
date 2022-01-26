@@ -13,8 +13,9 @@ source:
     - 0001-load-deepmd-automatically.patch
    
 build:
-  number: 4
+  number: 5
   skip: True  # [not linux]
+  noarch: python
 
 requirements:
   build:
