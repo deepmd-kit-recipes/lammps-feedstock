@@ -43,10 +43,17 @@ outputs:
       - lib/python*/site-packages/lammps/*/*
       - lib/python*/site-packages/lammps*
     requirements:
+      build:
+        - python >=3                             # [build_platform != target_platform]
+        - cross-python_{{ target_platform }} >=3 # [build_platform != target_platform]
       host:
         - python
+        - mpich
+        - mpi4py
       run:
         - python
+        - mpich
+        - mpi4py
     test:
       imports:
         - lammps
