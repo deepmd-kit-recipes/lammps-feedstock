@@ -15,6 +15,7 @@ source:
 build:
   number: 5
   skip: True  # [not linux]
+  skip: True  # [ppc64le]
 
 requirements:
   build:
