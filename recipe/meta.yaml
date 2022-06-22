@@ -55,6 +55,9 @@ outputs:
         - mpich
         - mpi4py
         - numpy
+      run_constrained:
+        # deprecated library
+        - pylammps-dp 999999999
     test:
       imports:
         - lammps
@@ -78,6 +81,9 @@ outputs:
         - libpng
         - jpeg
         - {{ pin_subpackage('pylammps', exact=True) }}
+      run_constrained:
+        # deprecated library
+        - lammps-dp 999999999
     files:
       - bin/lmp
       - lib/liblammps.so*
