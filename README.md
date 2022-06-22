@@ -1,5 +1,5 @@
-About lammps-dp
-===============
+About lammps-library
+====================
 
 Home: http://lammps.sandia.gov
 
@@ -44,13 +44,6 @@ Current build status
                   <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=master&jobName=linux&configuration=linux_64_" alt="variant">
                 </a>
               </td>
-            </tr><tr>
-              <td>linux_ppc64le</td>
-              <td>
-                <a href="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_build/latest?definitionId=3&branchName=master">
-                  <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=master&jobName=linux&configuration=linux_ppc64le_" alt="variant">
-                </a>
-              </td>
             </tr>
           </tbody>
         </table>
@@ -64,44 +57,70 @@ Current release info
 
 | Name | Downloads | Version | Platforms |
 | --- | --- | --- | --- |
-| [![Conda Recipe](https://img.shields.io/badge/recipe-lammps--dp-green.svg)](https://anaconda.org/deepmodeling/lammps-dp) | [![Conda Downloads](https://img.shields.io/conda/dn/deepmodeling/lammps-dp.svg)](https://anaconda.org/deepmodeling/lammps-dp) | [![Conda Version](https://img.shields.io/conda/vn/deepmodeling/lammps-dp.svg)](https://anaconda.org/deepmodeling/lammps-dp) | [![Conda Platforms](https://img.shields.io/conda/pn/deepmodeling/lammps-dp.svg)](https://anaconda.org/deepmodeling/lammps-dp) |
+| [![Conda Recipe](https://img.shields.io/badge/recipe-lammps-green.svg)](https://anaconda.org/deepmodeling/lammps) | [![Conda Downloads](https://img.shields.io/conda/dn/deepmodeling/lammps.svg)](https://anaconda.org/deepmodeling/lammps) | [![Conda Version](https://img.shields.io/conda/vn/deepmodeling/lammps.svg)](https://anaconda.org/deepmodeling/lammps) | [![Conda Platforms](https://img.shields.io/conda/pn/deepmodeling/lammps.svg)](https://anaconda.org/deepmodeling/lammps) |
+| [![Conda Recipe](https://img.shields.io/badge/recipe-pylammps-green.svg)](https://anaconda.org/deepmodeling/pylammps) | [![Conda Downloads](https://img.shields.io/conda/dn/deepmodeling/pylammps.svg)](https://anaconda.org/deepmodeling/pylammps) | [![Conda Version](https://img.shields.io/conda/vn/deepmodeling/pylammps.svg)](https://anaconda.org/deepmodeling/pylammps) | [![Conda Platforms](https://img.shields.io/conda/pn/deepmodeling/pylammps.svg)](https://anaconda.org/deepmodeling/pylammps) |
 
-Installing lammps-dp
-====================
+Installing lammps-library
+=========================
 
-Installing `lammps-dp` from the `deepmodeling` channel can be achieved by adding `deepmodeling` to your channels with:
+Installing `lammps-library` from the `deepmodeling` channel can be achieved by adding `deepmodeling` to your channels with:
 
 ```
 conda config --add channels deepmodeling
 conda config --set channel_priority strict
 ```
 
-Once the `deepmodeling` channel has been enabled, `lammps-dp` can be installed with:
+Once the `deepmodeling` channel has been enabled, `lammps, pylammps` can be installed with `conda`:
 
 ```
-conda install lammps-dp
+conda install lammps pylammps
 ```
 
-It is possible to list all of the versions of `lammps-dp` available on your platform with:
+or with `mamba`:
 
 ```
-conda search lammps-dp --channel deepmodeling
+mamba install lammps pylammps
+```
+
+It is possible to list all of the versions of `lammps` available on your platform with `conda`:
+
+```
+conda search lammps --channel deepmodeling
+```
+
+or with `mamba`:
+
+```
+mamba search lammps --channel deepmodeling
+```
+
+Alternatively, `mamba repoquery` may provide more information:
+
+```
+# Search all versions available on your platform:
+mamba repoquery search lammps --channel deepmodeling
+
+# List packages depending on `lammps`:
+mamba repoquery whoneeds lammps --channel deepmodeling
+
+# List dependencies of `lammps`:
+mamba repoquery depends lammps --channel deepmodeling
 ```
 
 
 
 
-Updating lammps-dp-feedstock
-============================
+Updating lammps-library-feedstock
+=================================
 
-If you would like to improve the lammps-dp recipe or build a new
+If you would like to improve the lammps-library recipe or build a new
 package version, please fork this repository and submit a PR. Upon submission,
 your changes will be run on the appropriate platforms to give the reviewer an
 opportunity to confirm that the changes result in a successful build. Once
 merged, the recipe will be re-built and uploaded automatically to the
 `deepmodeling` channel, whereupon the built conda packages will be available for
 everybody to install and use from the `deepmodeling` channel.
-Note that all branches in the deepmd-kit-recipes/lammps-dp-feedstock are
+Note that all branches in the deepmd-kit-recipes/lammps-library-feedstock are
 immediately built and any created packages are uploaded, so PRs should be based
 on branches in forks and branches in the main repository should only be used to
 build distinct package versions.
