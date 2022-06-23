@@ -1,6 +1,6 @@
-{% set name = "lammps-dp-library" %}
-{% set version = "2.0.2" %}
-{% set lammps = "stable_29Sep2021_update3" %}
+{% set name = "lammps-library" %}
+{% set version = "20220623.0" %}
+{% set lammps = "stable_23Jun2022" %}
 
 package:
   name: {{ name|lower }}
@@ -9,11 +9,9 @@ package:
 source:
   url: https://github.com/lammps/lammps/archive/{{ lammps }}.tar.gz
   #sha256: 5380c1689a93d7922e3d65d9c186401d429878bb3cbe9a692580d3470d6a253f
-  patches: 
-    - 0001-load-deepmd-automatically.patch
    
 build:
-  number: 6
+  number: 0
   skip: True  # [not linux]
   skip: True  # [ppc64le]
 
@@ -28,6 +26,8 @@ requirements:
   
   host:
     - python >=3
+    - setuptools
+    - numpy
     - plumed >=2.4,<2.8
     - mpich
     - zlib
@@ -36,7 +36,7 @@ requirements:
     - jpeg
 
 outputs:
-  - name: pylammps-dp
+  - name: pylammps
     build:
       noarch: python
     files:
@@ -51,15 +51,20 @@ outputs:
         - python >=3
         - mpich
         - mpi4py
+        - numpy
       run:
         - python >=3
         - mpich
         - mpi4py
+        - numpy
+      run_constrained:
+        # deprecated library
+        - pylammps-dp 999999999
     test:
       imports:
         - lammps
 
-  - name: lammps-dp
+  - name: lammps
     requirements:
       build:
         - {{ compiler('c') }}
@@ -72,13 +77,15 @@ outputs:
         - libpng
         - jpeg
       run:
-        - libdeepmd >={{ version }}
         - {{ pin_compatible('mpich') }}
         - plumed >=2
         - fftw
         - libpng
         - jpeg
-        - {{ pin_subpackage('pylammps-dp', exact=True) }}
+        - {{ pin_subpackage('pylammps', exact=True) }}
+      run_constrained:
+        # deprecated library
+        - lammps-dp 999999999
     files:
       - bin/lmp
       - lib/liblammps.so*
