@@ -11,7 +11,7 @@ source:
   #sha256: 5380c1689a93d7922e3d65d9c186401d429878bb3cbe9a692580d3470d6a253f
    
 build:
-  number: 0
+  number: 1
   skip: True  # [not linux]
   skip: True  # [ppc64le]
 
@@ -28,7 +28,7 @@ requirements:
     - python >=3
     - setuptools
     - numpy
-    - plumed >=2.4,<2.8
+    - plumed >=2.4,<2.9
     - mpich
     - zlib
     - fftw
@@ -70,7 +70,7 @@ outputs:
         - {{ compiler('c') }}
         - {{ compiler('cxx') }}
       host:
-        - plumed >=2.4,<2.8
+        - plumed >=2.4,<2.9
         - mpich
         - zlib
         - fftw
@@ -78,7 +78,7 @@ outputs:
         - jpeg
       run:
         - {{ pin_compatible('mpich') }}
-        - plumed >=2
+        - plumed >=2.4,<2.9
         - fftw
         - libpng
         - jpeg
