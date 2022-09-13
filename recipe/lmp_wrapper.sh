@@ -8,5 +8,5 @@ not been activated. Libraries may fail to load. To activate this environment
 please see https://conda.io/activation.
 EOF
 fi
-$PREFIX/bin/lmp "$@"
+$PREFIX/bin/_lmp "$@"
 
