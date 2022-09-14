@@ -8,3 +8,8 @@ cmake -D CMAKE_BUILD_TYPE=Release -D BUILD_LIB=ON -D BUILD_SHARED_LIBS=ON -D LAM
 make #-j${NUM_CPUS}
 make install
 
+# add a wrapper
+mv $PREFIX/bin/lmp $PREFIX/bin/_lmp
+envsubst '$PREFIX' < $RECIPE_DIR/lmp_wrapper.sh > $PREFIX/bin/lmp
+chmod +x $PREFIX/bin/lmp
+
