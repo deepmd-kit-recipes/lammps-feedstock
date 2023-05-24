@@ -1,6 +1,6 @@
 {% set name = "lammps-library" %}
-{% set version = "20220623.3" %}
-{% set lammps = "stable_23Jun2022_update3" %}
+{% set version = "20220623.4" %}
+{% set lammps = "stable_23Jun2022_update4" %}
 
 package:
   name: {{ name|lower }}
