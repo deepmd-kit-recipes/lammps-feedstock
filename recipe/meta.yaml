@@ -11,7 +11,7 @@ source:
   #sha256: 5380c1689a93d7922e3d65d9c186401d429878bb3cbe9a692580d3470d6a253f
    
 build:
-  number: 1
+  number: 2
   skip: True  # [not linux]
   skip: True  # [ppc64le]
 
@@ -52,6 +52,7 @@ outputs:
         - mpich
         - mpi4py
         - numpy
+        - hdf5
       run:
         - python >=3
         - mpich
