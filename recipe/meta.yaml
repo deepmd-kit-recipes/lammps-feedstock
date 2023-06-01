@@ -11,7 +11,7 @@ source:
   #sha256: 5380c1689a93d7922e3d65d9c186401d429878bb3cbe9a692580d3470d6a253f
    
 build:
-  number: 1
+  number: 2
   skip: True  # [not linux]
   skip: True  # [ppc64le]
 
@@ -34,6 +34,7 @@ requirements:
     - fftw
     - libpng
     - jpeg
+    - hdf5
 
 outputs:
   - name: pylammps
@@ -76,6 +77,7 @@ outputs:
         - fftw
         - libpng
         - jpeg
+        - hdf5
       run:
         - {{ pin_compatible('mpich') }}
         - plumed >=2.4,<2.9
