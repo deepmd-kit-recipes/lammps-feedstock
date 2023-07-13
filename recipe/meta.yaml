@@ -1,6 +1,6 @@
 {% set name = "lammps-library" %}
-{% set version = "20220623.1" %}
-{% set lammps = "stable_23Jun2022_update1" %}
+{% set version = "20220623.4" %}
+{% set lammps = "stable_23Jun2022_update4" %}
 
 package:
   name: {{ name|lower }}
@@ -11,7 +11,7 @@ source:
   #sha256: 5380c1689a93d7922e3d65d9c186401d429878bb3cbe9a692580d3470d6a253f
    
 build:
-  number: 2
+  number: 0
   skip: True  # [not linux]
   skip: True  # [ppc64le]
 
@@ -26,6 +26,7 @@ requirements:
   
   host:
     - python >=3
+    - pip
     - setuptools
     - numpy
     - plumed >=2.4,<2.9
@@ -100,6 +101,8 @@ outputs:
       - etc/profile.d/lammps.sh
       - etc/profile.d/lammps.csh
     test:
+      requires:
+        - mpich * h*
       commands:
         - lmp -help
         - test -f $PREFIX/lib/liblammps.so
