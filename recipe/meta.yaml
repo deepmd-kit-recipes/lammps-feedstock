@@ -101,6 +101,8 @@ outputs:
       - etc/profile.d/lammps.sh
       - etc/profile.d/lammps.csh
     test:
+      requires:
+        - mpich * h*
       commands:
         - lmp -help
         - test -f $PREFIX/lib/liblammps.so
