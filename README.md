@@ -1,11 +1,11 @@
-About lammps-library
-====================
+About lammps-library-feedstock
+==============================
+
+Feedstock license: [BSD-3-Clause](https://github.com/deepmd-kit-recipes/lammps-dp-feedstock/blob/main/LICENSE.txt)
 
 Home: http://lammps.sandia.gov
 
 Package license: GPL-2.0
-
-Feedstock license: [BSD-3-Clause](https://github.com/deepmd-kit-recipes/lammps-dp-feedstock/blob/master/LICENSE.txt)
 
 Summary: LAMMPS stands for Large-scale Atomic/Molecular Massively Parallel Simulator.
 
@@ -31,8 +31,8 @@ Current build status
     <td>
       <details>
         <summary>
-          <a href="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_build/latest?definitionId=3&branchName=master">
-            <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=master">
+          <a href="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_build/latest?definitionId=3&branchName=main">
+            <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=main">
           </a>
         </summary>
         <table>
@@ -40,8 +40,8 @@ Current build status
           <tbody><tr>
               <td>linux_64</td>
               <td>
-                <a href="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_build/latest?definitionId=3&branchName=master">
-                  <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=master&jobName=linux&configuration=linux_64_" alt="variant">
+                <a href="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_build/latest?definitionId=3&branchName=main">
+                  <img src="https://dev.azure.com/deepmd-kit-recipes/feedstock-builds/_apis/build/status/lammps-dp-feedstock?branchName=main&jobName=linux&configuration=linux%20linux_64_" alt="variant">
                 </a>
               </td>
             </tr>
