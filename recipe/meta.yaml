@@ -27,6 +27,7 @@ requirements:
   host:
     - python >=3
     - pip
+    - python-build
     - setuptools
     - numpy
     - plumed >=2.4,<2.9
