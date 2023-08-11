@@ -56,6 +56,12 @@ outputs:
         - mpich
         - mpi4py
         - numpy
+        - plumed >=2.4,<2.9
+        - zlib
+        - fftw
+        - libpng
+        - jpeg
+        - hdf5
       run:
         - python >=3
         - mpich
