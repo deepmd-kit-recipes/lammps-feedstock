@@ -7,7 +7,8 @@ ARGS="-D PKG_ASPHERE=ON -DPKG_BODY=ON -D PKG_CLASS2=ON -D PKG_COLLOID=ON -D PKG_
 cmake -D CMAKE_BUILD_TYPE=Release -D BUILD_LIB=ON -D BUILD_SHARED_LIBS=ON -D LAMMPS_INSTALL_RPATH=ON -DCMAKE_INSTALL_LIBDIR=lib $ARGS -D FFT=FFTW3 -D CMAKE_INSTALL_PREFIX=${PREFIX} ../cmake
 make #-j${NUM_CPUS}
 make install
-make install-python
+cd ../python
+pip install -vv .
 
 # add a wrapper
 mv $PREFIX/bin/lmp $PREFIX/bin/_lmp
