@@ -1,6 +1,6 @@
 {% set name = "lammps-library" %}
-{% set version = "20230802.0" %}
-{% set lammps = "stable_2Aug2023" %}
+{% set version = "20230802.1" %}
+{% set lammps = "stable_2Aug2023_update1" %}
 
 package:
   name: {{ name|lower }}
@@ -11,7 +11,7 @@ source:
   #sha256: 5380c1689a93d7922e3d65d9c186401d429878bb3cbe9a692580d3470d6a253f
    
 build:
-  number: 1
+  number: 0
   skip: True  # [not linux]
   skip: True  # [ppc64le]
 
